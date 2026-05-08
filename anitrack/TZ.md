@@ -35,6 +35,13 @@
 
 ---
 
+### Инициализация
+- Настроил dockerfile, docker-compose, env, settings(database), requirements
+
+### Авторизация
+- создал приложение users
+- создаю кастомную модель
+
 ### models
 User
 
