@@ -12,6 +12,9 @@ from .serializers import RegistrationSerializer, UserSerializer, ChangePasswordS
 # Create your views here.
 
 class RegistrationAPIView(APIView):
+    """
+        Simple jwt регистрация
+    """
     permission_classes = (AllowAny,)
     serializer_class = RegistrationSerializer
 
@@ -22,7 +25,11 @@ class RegistrationAPIView(APIView):
             return Response(serializer.data, status=HTTP_201_CREATED)
         return Response(serializer.errors, status=400)
 
+
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    """
+        Страница пользователя
+    """
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
@@ -30,6 +37,9 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         return self.request.user
 
 class ChangePasswordAPIView(APIView):
+    """
+        Simple jwt сменить пароль
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

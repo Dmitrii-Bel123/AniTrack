@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import UserAnimeListCreateView, UserAnimeDetailView
-from rest_framework import routers
+
 
 
 urlpatterns = [
