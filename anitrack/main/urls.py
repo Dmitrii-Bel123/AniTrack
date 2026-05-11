@@ -1,20 +1,18 @@
 from django.urls import path
-# from .views import
+from .views import UserAnimeListCreateView, UserAnimeDetailView
+from rest_framework import routers
 
 
 urlpatterns = [
-    path('list/', UserListView.as_view(), name='user-list'),
-    path('add-new/', AddNewAnimeView.as_view(), name='add-new-anime'),
-    path('delete/', DeleteAnimeView.as_view(), name='delete-anime'),
-    path('delete/', DeleteAnimeView.as_view(), name='delete-anime'),
-]
+    path('user/', UserAnimeListCreateView.as_view()),
+    path('user/<int:pk>/', UserAnimeDetailView.as_view()),
+    ]
 
 '''
 
 GET api/anime/{mal_id}/
-
-search:
-GET /api/anime/search/?q=naruto
+GET /api/anime/?search=naruto
+GET /api/anime/search/?q=naruto Передумал
 
 user:
 GET api/anime/user/
