@@ -1,9 +1,11 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserAnimeListSerializer, UserAnimeDetailSerializer
+from .serializers import UserAnimeListSerializer, UserAnimeDetailSerializer, AnimeSearchSerializer, AnimeCreateSerializer
 from .models import UserAnime
+from .services import search_anime, get_or_create_anime
 
 
 
@@ -40,8 +42,62 @@ class UserAnimeDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class AnimeSearchView(APIView):
-    pass
+    """
+    GET /api/anime/search/?q=naruto
+    Проксируем запрос в Jikan, возвращаем результаты.
+    В БД ничего не пишем.
+    """
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response(
+                {"detail":"Параметр q обязателен"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        results = search_anime(query)
+        serializer = AnimeSearchSerializer(instance=results, many=True)
+        return Response(serializer.data)
+
+    serializer_class = AnimeSearchSerializer
 
 class AddAnimeToListView(APIView):
-    pass
+    """
+    POST /api/anime/my/add/
+    Тело: { "mal_id": 1735, "user_status": "plan_to_watch" }
+
+    1. Валидируем входные данные
+    2. get_or_create аниме (возможен запрос в Jikan)
+    3. Создаём UserAnime, если ещё не добавлено
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AnimeCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        mal_id = serializer.validated_data['mal_id']
+        user_status = serializer.validated_data['user_status']
+
+        # Получаем или создаём аниме в нашей БД
+        try:
+            anime = get_or_create_anime(mal_id)
+        except Exception as e:
+            return Response(
+                {"detail": f"Ошибка при получении аниме: {str(e)}"}
+            )
+
+        # Проверяем: вдруг пользователь уже добавил это аниме
+        user_anime, created = UserAnime.objects.get_or_create(
+            user=request.user,
+            anime=anime,
+            defaults={'user_status':user_status}
+        )
+
+        if not created:
+            return Response({'detail': 'Аниме уже есть в вашем списке'}, status=status.HTTP_200_OK)
+        return Response(
+            UserAnimeDetailSerializer(user_anime).data,
+            status=status.HTTP_201_CREATED
+        )
