@@ -3,9 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserAnimeListSerializer, UserAnimeDetailSerializer, AnimeSearchSerializer, AnimeCreateSerializer
+from .serializers import (UserAnimeListSerializer, UserAnimeDetailSerializer,
+                          AnimeSearchSerializer, AnimeCreateSerializer)
 from .models import UserAnime
-from .services import search_anime, get_or_create_anime
+from .services import search_anime, get_or_create_anime, fetch_anime_detail
 
 
 
@@ -33,13 +34,71 @@ class UserAnimeDetailView(generics.RetrieveUpdateDestroyAPIView):
     PATCH  /api/anime/my/<id>/  — обновить статус / оценку / заметку
     DELETE /api/anime/my/<id>/  — удалить из списка
     """
-    serializer_class = UserAnimeDetailSerializer
     permission_classes = [IsAuthenticated,]
     http_method_names = ['get', 'patch', 'delete']
 
     def get_queryset(self):
         return UserAnime.objects.filter(user=self.request.user).select_related('anime')
 
+    def get_serializer_class(self):
+        """ PATCH использует обычный сериализатор без Jikan """
+        if self.request.method=='PATCH':
+            return UserAnimeDetailSerializer
+        return None
+
+
+    def retrieve(self, request, *args, **kwargs):
+        """ Переопределение. Для отображения более подробной динамической информации из апи """
+        user_anime = self.get_object() # автоматически проверяет что объект принадлежит юзеру
+
+        try:
+            jikan_data = fetch_anime_detail(user_anime.anime.mal_id)
+        except Exception:
+            jikan_data = {}
+
+        user_data = UserAnimeDetailSerializer(user_anime).data
+
+        response_data = {
+            # Из Jikan
+            "mal_id": jikan_data.get("mal_id"),
+            "url": jikan_data.get("url"),
+            "title": jikan_data.get("title"),
+            "title_japanese": jikan_data.get("title_japanese"),
+            "source": jikan_data.get("source"),
+            "synopsis": jikan_data.get("synopsis"),
+            "episodes": jikan_data.get("episodes"),
+            "status": jikan_data.get("status"),  # OnAir / Finished и т.д.
+            "airing": jikan_data.get("airing"), # Выходит ли еще
+            "score": jikan_data.get("score"),  # оценка MAL
+            "year": jikan_data.get("year"),
+            "poster": (
+                jikan_data.get("images", {})
+                .get("jpg", {})
+                .get("large_image_url")  # large — для детальной страницы
+            ),
+            "genres": [
+                g["name"] for g in jikan_data.get("genres", [])
+            ],
+            "studios": [
+                s["name"] for s in jikan_data.get("studios", [])
+            ],
+            "trailer": (
+                jikan_data.get("trailer", {}).get("url")
+            ),
+
+            # Данные пользователя поверх
+            "user_anime_id": user_data["id"],
+            "user_status": user_data["user_status"],
+            "user_rate": user_data["user_rate"],
+            "user_note": user_data["user_note"],
+            "user_fav_character": user_data["user_fav_character"],
+            "started_at": user_data["started_at"],
+            "finished_at": user_data["finished_at"],
+            "created_at": user_data["created_at"],
+            "updated_at": user_data["updated_at"],
+        }
+
+        return Response(response_data)
 
 class AnimeSearchView(APIView):
     """

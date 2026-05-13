@@ -9,7 +9,7 @@ urlpatterns = [
     path('my/<int:pk>/', UserAnimeDetailView.as_view()),
 
     # Jikan Api
-    path('search', AnimeSearchView.as_view()),
+    path('search/', AnimeSearchView.as_view()),
     path('my/add/', AddAnimeToListView.as_view()),
     ]
 

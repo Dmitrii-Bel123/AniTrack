@@ -67,7 +67,7 @@ class AnimeSearchSerializer(serializers.Serializer):
     mal_id = serializers.IntegerField()
     title = serializers.CharField()
     poster = serializers.SerializerMethodField()
-    episodes = serializers.URLField()
+    episodes = serializers.IntegerField()
     genres = serializers.SerializerMethodField()
     synopsis = serializers.CharField()
 

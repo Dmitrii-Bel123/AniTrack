@@ -9,7 +9,7 @@ def search_anime(query: str) -> list:
     """Поиск аниме через Jikan. Ничего не сохраняем."""
     params = {'q':query, "limit":10}
     try:
-        response = requests.get(f'{JIKAN_API_URL}/anime/', params=params, timeout=10)
+        response = requests.get(f'{JIKAN_API_URL}anime/', params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
         return data.get("data", [])
