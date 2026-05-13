@@ -61,8 +61,66 @@
 
 
 ### models
+BaseModels:
 User
+- avatar
+
+Jikan API:
+Genre
+- title
 
 Anime
+- mal_id
+- title
+- genres(FK Genre)
+- poster
+- episodes
 
+User Info:
+UserAnime
+- user(FK User)
+- anime(FK Anime)
+- user_note
+- user_rate
+- user_fav_character
+- user_status
+- started_at
+- finished_at
+- created_at
+- updated_at
 
+### API endpoints
+
+- GET api/anime/{mal_id}/ 
+- GET /api/anime/?search=naruto 
+- GET /api/anime/search/?q=naruto Передумал
+
+user:
+- GET api/anime/my/ 
+- GET api/anime/user/?status=PR
+
+- GET api/anime/my/{id}/
+- PATCH api/anime/my/{id}/
+- DELETE api/anime/my/{id}/
+
+Из них получаются представления:
+
+UserAnimeListCreateView. Serializer -  
+UserAnimeDetailView. Serializer - UserListSerializer
+
+Клиент отправляет:  { "mal_id": 1735, "user_status": "WW" }
+                          ↓
+Сервер проверяет: есть ли Anime с таким mal_id в БД?
+                          ↓
+          Нет → идёт в Jikan, получает данные, создаёт Anime
+          Да  → берёт существующий
+                          ↓
+          Создаёт запись UserAnime для этого пользователя
+
+1. Пользователь ищет аниме → /api/anime/search/?q=naruto
+   └── бэкенд проксирует запрос в Jikan, возвращает результаты (в БД ничего не пишем)
+
+2. Пользователь нажимает «Добавить» → POST /api/anime/my/add/  { mal_id: 1735 }
+   └── бэкенд смотрит: есть аниме в нашей БД?
+       ├── Да → берём оттуда
+       └── Нет → тянем с Jikan, сохраняем в Anime, потом создаём UserAnime

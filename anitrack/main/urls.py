@@ -1,11 +1,16 @@
 from django.urls import path
-from .views import UserAnimeListCreateView, UserAnimeDetailView
+from .views import UserAnimeListView, UserAnimeDetailView, AnimeSearchView, AddAnimeToListView
 
 
 
 urlpatterns = [
-    path('user/', UserAnimeListCreateView.as_view()),
-    path('user/<int:pk>/', UserAnimeDetailView.as_view()),
+    # User routs
+    path('my/', UserAnimeListView.as_view()),
+    path('my/<int:pk>/', UserAnimeDetailView.as_view()),
+
+    # Jikan Api
+    path('search', AnimeSearchView.as_view()),
+    path('my/add/', AddAnimeToListView.as_view()),
     ]
 
 '''
@@ -15,9 +20,8 @@ GET /api/anime/?search=naruto
 GET /api/anime/search/?q=naruto Передумал
 
 user:
-GET api/anime/user/
-POST api/anime/user/
-GET api/anime/user/?status=PR
+GET api/anime/my/
+GET api/anime/my/?status=PR
 
 GET api/anime/user/{id}/
 PATCH api/anime/user/{id}/
