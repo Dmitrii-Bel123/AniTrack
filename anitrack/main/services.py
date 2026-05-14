@@ -38,16 +38,13 @@ def get_or_create_anime(mal_id: int) -> Anime:
     Если аниме уже есть в нашей БД — просто возвращаем.
     Если нет — тянем с Jikan и сохраняем.
     """
-    print(">>> [1] вызвали get_or_create_anime, mal_id =", mal_id)
     try:
         anime = Anime.objects.get(mal_id=mal_id)
-        print(">>> [2] нашли в БД:", anime)
         return anime
     except Anime.DoesNotExist:
         print(">>> [3] в БД нет, идём в Jikan")
 
     api_data = fetch_anime_detail(mal_id)
-    print(">>> [4] данные с Jikan:", api_data)
 
     genres = []
     for genre_data in api_data.get("genres", []):

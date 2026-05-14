@@ -1,7 +1,10 @@
 from rest_framework import generics, status
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 from .serializers import (UserAnimeListSerializer, UserAnimeDetailSerializer,
                           AnimeSearchSerializer, AnimeCreateSerializer)
@@ -13,11 +16,19 @@ from .services import search_anime, get_or_create_anime, fetch_anime_detail
 class UserAnimeListView(generics.ListAPIView):
     """
     GET /api/anime/my/
+
+    GET /api/anime/my?ordering=user_rate
+    GET /api/anime/my?user_status=PR
+    GET /api/anime/my?search=One Piece - Не работает
     Список аниме, которые добавил пользователь
     """
     serializer_class = UserAnimeListSerializer
     permission_classes = [IsAuthenticated, ]
-    # filtering
+    filter_backends = [OrderingFilter, DjangoFilterBackend, SearchFilter]
+    ordering_fields = ['user_rate', 'created_at']
+    filterset_fields = ['user_status']
+    search_fields = ['anime__title']
+    ordering = ['created_at']
     # pagination_class = UserAnimePaginator
 
     def get_queryset(self):
