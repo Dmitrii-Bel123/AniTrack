@@ -1,7 +1,5 @@
 from django.urls import path
-from .views import UserAnimeListView, UserAnimeDetailView, AnimeSearchView, AddAnimeToListView
-
-
+from .views import UserAnimeListView, UserAnimeDetailView, AnimeSearchView, AddAnimeToListView, StatisticsView
 
 urlpatterns = [
     # User routs
@@ -11,20 +9,7 @@ urlpatterns = [
     # Jikan Api
     path('search/', AnimeSearchView.as_view()),
     path('my/add/', AddAnimeToListView.as_view()),
+
+    #Statistics
+    path('my/stat/', StatisticsView.as_view()),
     ]
-
-'''
-
-GET api/anime/{mal_id}/
-GET /api/anime/?search=naruto
-GET /api/anime/search/?q=naruto Передумал
-
-user:
-GET api/anime/my/
-GET api/anime/my/?status=PR
-
-GET api/anime/user/{id}/
-PATCH api/anime/user/{id}/
-DELETE api/anime/user/{id}/
-
-'''

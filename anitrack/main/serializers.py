@@ -87,3 +87,13 @@ class AnimeCreateSerializer(serializers.Serializer):
         if value <= 0:
             raise serializers.ValidationError('Mal id must be positive')
         return value
+
+
+class StatisticSerializer(serializers.Serializer):
+    total_anime = serializers.IntegerField()
+    want = serializers.IntegerField()
+    watching = serializers.IntegerField()
+    watched = serializers.IntegerField()
+    dropped = serializers.IntegerField()
+    avg_rate = serializers.FloatField()
+    total_episodes = serializers.IntegerField()

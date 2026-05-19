@@ -1,3 +1,4 @@
+from django.db.models import Count, Avg, Q, Sum
 from rest_framework import generics, status
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 
 from .serializers import (UserAnimeListSerializer, UserAnimeDetailSerializer,
-                          AnimeSearchSerializer, AnimeCreateSerializer)
+                          AnimeSearchSerializer, AnimeCreateSerializer, StatisticSerializer)
 from .models import UserAnime
 from .services import search_anime, get_or_create_anime, fetch_anime_detail
 
@@ -171,3 +172,24 @@ class AddAnimeToListView(APIView):
             UserAnimeDetailSerializer(user_anime).data,
             status=status.HTTP_201_CREATED
         )
+
+
+class StatisticsView(APIView):
+    """"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        queryset = UserAnime.objects.filter(user=request.user)
+
+        stats = queryset.aggregate(
+            total_anime=Count("id"),
+            want=Count("id", filter=Q(user_status=UserAnime.StatusChoices.WANT)),
+            watching=Count("id", filter=Q(user_status=UserAnime.StatusChoices.WATCHING)),
+            watched=Count("id", filter=Q(user_status=UserAnime.StatusChoices.WATCHED)),
+            dropped=Count("id", filter=Q(user_status=UserAnime.StatusChoices.DROPPED)),
+            avg_rate=Avg("user_rate"),
+            total_episodes=Sum("anime__episodes", filter=Q(user_status=UserAnime.StatusChoices.WATCHED))
+        )
+
+        serializer = StatisticSerializer(instance=stats)
+        return Response(serializer.data)
