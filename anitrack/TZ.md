@@ -158,4 +158,4 @@ docker run --rm -it \
   -v ${PWD}/frontend:/app \
   -w /app \
   node:22 \
-  npm run build
+  npm run build && docker-compose restart nginx
