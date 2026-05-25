@@ -124,3 +124,29 @@ UserAnimeDetailView. Serializer - UserListSerializer
    └── бэкенд смотрит: есть аниме в нашей БД?
        ├── Да → берём оттуда
        └── Нет → тянем с Jikan, сохраняем в Anime, потом создаём UserAnime
+
+
+docker run --rm -it \
+  -v ${PWD}:/app \
+  -w /app \
+  node:22 \
+  npm create vite@latest frontend -- --template react-ts
+
+
+dockerfile frontend
+nginx conf
+docker-compose
+
+docker run --rm -it \
+  -v ${PWD}/frontend:/app \
+  -w /app \
+  node:22 \
+  npm run build
+
+
+
+docker run --rm -it \
+  -v ${PWD}/frontend:/app \
+  -w /app \
+  node:22 \
+  npm install axios react-router-dom

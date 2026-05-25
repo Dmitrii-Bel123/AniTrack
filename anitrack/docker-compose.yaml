@@ -2,7 +2,7 @@ services:
   anitrack:
     build: .
     container_name: anitrack
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn anitrack.wsgi:application --bind 0.0.0.0:8000 --workers 3
     volumes:
       - .:/code
     ports:
@@ -21,5 +21,22 @@ services:
       - POSTGRES_DB=${PG_DATABASE}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - '80:80'
+    volumes:
+        - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        - ./frontend/dist:/usr/share/nginx/html
+    depends_on:
+      - anitrack
+      - anitrack_db
+
 volumes:
   postgres_data:

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-huci#y!ios$gbr!+tvzg@m4n9bwusc3z*e#n3myy!v^cyr60wx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -71,6 +71,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'anitrack.urls'
+
+CORS_ALLOWED_ORIGINS = ["http://localhost", "http://127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost"]
 
 TEMPLATES = [
     {
