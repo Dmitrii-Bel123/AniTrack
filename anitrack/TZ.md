@@ -150,3 +150,12 @@ docker run --rm -it \
   -w /app \
   node:22 \
   npm install axios react-router-dom
+
+axios — для запросов к API, react-router-dom — для навигации между страницами. Запускай и скажи когда готово.
+
+ребилд:
+docker run --rm -it \
+  -v ${PWD}/frontend:/app \
+  -w /app \
+  node:22 \
+  npm run build

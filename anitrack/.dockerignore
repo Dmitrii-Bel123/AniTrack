@@ -1,9 +1,16 @@
-venv/
+# Секреты — никогда не пушим
+.env
+.env.prod
+
+# Python
 __pycache__/
 *.pyc
-.git
-.idea
-.env
-data/
-node_modules
-dist
+.venv/
+
+# Django
+static/
+media/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
