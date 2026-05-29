@@ -1,0 +1,288 @@
+/* ── List page ──────────────────────────────────────────────── */
+.list-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.list-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+}
+
+.filter-btn:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.filter-btn--active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: rgba(218, 123, 147, 0.3);
+  font-weight: 600;
+}
+
+.list-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Поиск ──────────────────────────────────────────────────── */
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 220px;
+  padding: 8px 12px 8px 34px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.845rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+  outline: none;
+}
+
+.search-input::placeholder { color: var(--text-dim); }
+
+/* ── Сортировка ─────────────────────────────────────────────── */
+.sort-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  transition: border-color var(--transition);
+  cursor: pointer;
+}
+
+.sort-select:focus { outline: none; border-color: var(--accent); }
+
+.sort-dir-btn {
+  width: 34px; height: 34px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.sort-dir-btn:hover { color: var(--text); border-color: var(--border-hover); }
+
+/* ── Состояния ──────────────────────────────────────────────── */
+.list-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ── Сетка ──────────────────────────────────────────────────── */
+.list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Карточка в списке ──────────────────────────────────────── */
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px 12px 12px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.list-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.list-card__poster {
+  width: 52px;
+  height: 74px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-deep);
+  display: block;
+}
+
+.list-card__poster img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.list-card:hover .list-card__poster img { transform: scale(1.05); }
+
+.list-card__no-img {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.list-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.list-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.list-card__title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 340px;
+  transition: color var(--transition);
+}
+
+.list-card__title:hover { color: var(--accent); }
+
+.list-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.list-card__eps {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.list-card__genre {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 2px 8px;
+}
+
+.list-card__rate {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.rate-star { font-size: 0.78rem; color: var(--accent); }
+.rate-val  { font-size: 0.9rem; font-weight: 700; font-family: var(--font-display); color: var(--text); }
+.rate-max  { font-size: 0.72rem; color: var(--text-dim); }
+
+.list-card__note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-style: italic;
+}
+
+/* ── Кнопки действий ────────────────────────────────────────── */
+.list-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.list-card:hover .list-card__actions { opacity: 1; }
+
+.action-btn {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--bg-deep);
+  color: var(--text-dim);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+
+.action-btn--edit:hover  { color: var(--accent); border-color: rgba(218,123,147,0.3); background: var(--accent-dim); }
+.action-btn--delete:hover { color: #e08080; border-color: rgba(224,128,128,0.2); background: rgba(46,21,27,0.5); }
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }

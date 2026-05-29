@@ -1,66 +1,110 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { IconPlayerPlay, IconPlus, IconChartBar } from '@tabler/icons-react';
 import api from '../api/axios';
 import type { AxiosResponse } from 'axios';
+import type { Stats, UserAnime } from '../types/index';
+import { STATUS_LABEL, STATUS_BADGE } from '../types/index';
 
-interface Stats {
-  total_anime: number;
-  want: number;
-  watching: number;
-  watched: number;
-  dropped: number;
-  avg_rate: number | null;
-  total_episodes: number | null;
+// ── Анимированный счётчик ─────────────────────────────────────
+function useCountUp(target: number, duration = 800) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (target === 0) return;
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      setVal(Math.floor(progress * target));
+      if (progress < 1) requestAnimationFrame(step);
+      else setVal(target);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration]);
+  return val;
 }
 
-interface AnimeShort {
-  id: number;
-  anime: {
-    id: number;
-    title: string;
-    poster: string | null;
-    episodes: number | null;
-    genres: { id: number; title: string }[];
-  };
-  user_rate: string | null;
-  user_status: 'WW' | 'PR' | 'WD' | 'DR';
+// ── Spotlight — аниме которое сейчас смотришь ─────────────────
+function Spotlight({ item }: { item: UserAnime }) {
+  return (
+    <Link to={`/list/${item.id}`} className="spotlight">
+      {item.anime.poster && (
+        <div
+          className="spotlight-bg"
+          style={{ backgroundImage: `url(${item.anime.poster})` }}
+        />
+      )}
+      <div className="spotlight-overlay" />
+      <div className="spotlight-content">
+        <div className="spotlight-poster">
+          {item.anime.poster
+            ? <img src={item.anime.poster} alt={item.anime.title} />
+            : <IconPlayerPlay size={28} stroke={1.5} />
+          }
+        </div>
+        <div className="spotlight-info">
+          <span className="spotlight-tag">▶ сейчас смотришь</span>
+          <h2 className="spotlight-title">{item.anime.title}</h2>
+          <p className="spotlight-meta">
+            {item.anime.episodes && `${item.anime.episodes} эп.`}
+            {item.anime.genres.length > 0 && ` · ${item.anime.genres.slice(0, 2).map(g => g.title).join(', ')}`}
+          </p>
+          <div className="spotlight-btns">
+            <span className="btn btn-primary btn-sm">Открыть</span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  WW: 'Планирую',
-  PR: 'Смотрю',
-  WD: 'Просмотрено',
-  DR: 'Дропнуто',
-};
+// ── Метрика ───────────────────────────────────────────────────
+function MetricCard({ label, value, accent, muted, float }: {
+  label: string;
+  value: number;
+  accent?: boolean;
+  muted?: boolean;
+  float?: boolean;
+}) {
+  const animated = useCountUp(float ? 0 : value);
+  return (
+    <div className={`metric-card card ${accent ? 'metric-card--accent' : ''} ${muted ? 'metric-card--muted' : ''}`}>
+      <span className="metric-value">
+        {float ? (value > 0 ? value.toFixed(1) : '—') : animated}
+      </span>
+      <span className="metric-label">{label}</span>
+    </div>
+  );
+}
 
-const STATUS_BADGE: Record<string, string> = {
-  WW: 'badge-want',
-  PR: 'badge-watching',
-  WD: 'badge-watched',
-  DR: 'badge-dropped',
-};
-
+// ── Главный компонент ─────────────────────────────────────────
 export default function Dashboard() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [recent, setRecent] = useState<AnimeShort[]>([]);
+  const [stats,   setStats]   = useState<Stats | null>(null);
+  const [recent,  setRecent]  = useState<UserAnime[]>([]);
   const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     Promise.all([
       api.get('/anime/my/stat/'),
       api.get('/anime/my/?ordering=-created_at'),
-    ]).then(([statsRes, listRes]: [AxiosResponse<Stats>, AxiosResponse<{ results?: AnimeShort[] } | AnimeShort[]>]) => {
-      setStats(statsRes.data);
-      const data = listRes.data;
+    ]).then(([sRes, lRes]: [AxiosResponse<Stats>, AxiosResponse<UserAnime[] | { results: UserAnime[] }>]) => {
+      setStats(sRes.data);
+      const data = lRes.data;
       const items = Array.isArray(data) ? data : (data.results ?? []);
       setRecent(items.slice(0, 6));
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
+  const watching = recent.find(i => i.user_status === 'PR');
+
   if (loading) {
     return (
-      <div className="db-loading">
-        <span className="spinner" style={{ width: 32, height: 32 }} />
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh' }}>
+        <span className="spinner" style={{ width:32, height:32 }} />
       </div>
     );
   }
@@ -68,76 +112,66 @@ export default function Dashboard() {
   return (
     <div className="db fade-in">
 
-      {/* ── Заголовок ── */}
+      {/* Заголовок + кнопки */}
       <div className="db-hero">
         <div>
           <h2 className="db-heading">Обзор коллекции</h2>
           <p className="db-sub">Всё что ты смотришь, смотрел и планируешь</p>
         </div>
         <div className="db-actions">
-          <Link to="/search" className="btn btn-primary">+ Добавить аниме</Link>
-          <Link to="/list"   className="btn btn-ghost">Мой список</Link>
+          <Link to="/search" className="btn btn-primary">
+            <IconPlus size={16} stroke={2} /> Добавить
+          </Link>
+          <Link to="/stats" className="btn btn-ghost">
+            <IconChartBar size={16} stroke={1.75} /> Статистика
+          </Link>
         </div>
       </div>
 
-      {/* ── Метрики ── */}
+      {/* Spotlight */}
+      {watching && <Spotlight item={watching} />}
+
+      {/* Метрики */}
       {stats && (
         <div className="db-metrics">
-          <MetricCard label="Всего"        value={stats.total_anime} icon="◈" />
-          <MetricCard label="Смотрю"       value={stats.watching}    icon="▶" accent />
-          <MetricCard label="Просмотрено"  value={stats.watched}     icon="✓" />
-          <MetricCard label="Планирую"     value={stats.want}        icon="◎" />
-          <MetricCard label="Дропнуто"     value={stats.dropped}     icon="✕" muted />
-          <MetricCard
-            label="Средняя оценка"
-            value={stats.avg_rate ? Number(stats.avg_rate).toFixed(1) : '—'}
-            icon="★"
-            accent
-          />
-          <MetricCard
-            label="Эпизодов просмотрено"
-            value={stats.total_episodes ?? 0}
-            icon="⊞"
-          />
+          <MetricCard label="Всего аниме"    value={stats.total_anime} />
+          <MetricCard label="Просмотрено"    value={stats.watched} />
+          <MetricCard label="Смотрю"         value={stats.watching} accent />
+          <MetricCard label="Планирую"       value={stats.want} />
+          <MetricCard label="Дропнуто"       value={stats.dropped} muted />
+          <MetricCard label="Средняя оценка" value={stats.avg_rate ?? 0} float accent />
+          <MetricCard label="Эпизодов"       value={stats.total_episodes ?? 0} />
         </div>
       )}
 
-      {/* ── Прогресс-бар ── */}
+      {/* Прогресс-бар */}
       {stats && stats.total_anime > 0 && (
         <div className="card db-progress-card">
           <p className="db-section-title">Распределение по статусам</p>
           <div className="progress-bar">
-            <div
-              className="progress-seg seg-watching"
-              style={{ width: `${(stats.watching / stats.total_anime) * 100}%` }}
-              title={`Смотрю: ${stats.watching}`}
-            />
-            <div
-              className="progress-seg seg-watched"
-              style={{ width: `${(stats.watched / stats.total_anime) * 100}%` }}
-              title={`Просмотрено: ${stats.watched}`}
-            />
-            <div
-              className="progress-seg seg-want"
-              style={{ width: `${(stats.want / stats.total_anime) * 100}%` }}
-              title={`Планирую: ${stats.want}`}
-            />
-            <div
-              className="progress-seg seg-dropped"
-              style={{ width: `${(stats.dropped / stats.total_anime) * 100}%` }}
-              title={`Дропнуто: ${stats.dropped}`}
-            />
+            {[
+              { key: 'watched',  width: stats.watched,  cls: 'seg-watched' },
+              { key: 'watching', width: stats.watching, cls: 'seg-watching' },
+              { key: 'want',     width: stats.want,     cls: 'seg-want' },
+              { key: 'dropped',  width: stats.dropped,  cls: 'seg-dropped' },
+            ].map(({ key, width, cls }) => (
+              <div
+                key={key}
+                className={`progress-seg ${cls}`}
+                style={{ width: `${(width / stats.total_anime) * 100}%` }}
+              />
+            ))}
           </div>
           <div className="progress-legend">
-            <LegendItem color="var(--surface-2)" label="Смотрю"      count={stats.watching} />
             <LegendItem color="var(--accent)"    label="Просмотрено" count={stats.watched} />
+            <LegendItem color="var(--surface-2)" label="Смотрю"      count={stats.watching} />
             <LegendItem color="var(--surface)"   label="Планирую"    count={stats.want} />
             <LegendItem color="#7a3040"           label="Дропнуто"    count={stats.dropped} />
           </div>
         </div>
       )}
 
-      {/* ── Последние добавленные ── */}
+      {/* Последние добавленные */}
       {recent.length > 0 && (
         <div className="db-recent">
           <div className="db-section-header">
@@ -173,31 +207,16 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── Пустое состояние ── */}
+      {/* Пустое состояние */}
       {!loading && recent.length === 0 && (
         <div className="db-empty card">
           <p className="db-empty__icon">◎</p>
-          <p className="db-empty__text">Список пока пуст</p>
-          <Link to="/search" className="btn btn-primary">Найти аниме</Link>
+          <p className="db-empty__text">Список пока пуст — найди первое аниме</p>
+          <Link to="/search" className="btn btn-primary">
+            <IconPlus size={16} stroke={2} /> Найти аниме
+          </Link>
         </div>
       )}
-
-    </div>
-  );
-}
-
-function MetricCard({ label, value, icon, accent, muted }: {
-  label: string;
-  value: number | string;
-  icon: string;
-  accent?: boolean;
-  muted?: boolean;
-}) {
-  return (
-    <div className={`metric-card card ${accent ? 'metric-card--accent' : ''} ${muted ? 'metric-card--muted' : ''}`}>
-      <span className="metric-icon">{icon}</span>
-      <span className="metric-value">{value}</span>
-      <span className="metric-label">{label}</span>
     </div>
   );
 }

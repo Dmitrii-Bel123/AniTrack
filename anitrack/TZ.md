@@ -159,3 +159,10 @@ docker run --rm -it \
   -w /app \
   node:22 \
   npm run build && docker-compose restart nginx
+
+Установка иконок
+docker run --rm -it \
+  -v ${PWD}/frontend:/app \
+  -w /app \
+  node:22 \
+  npm install @tabler/icons-react

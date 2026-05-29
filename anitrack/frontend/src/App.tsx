@@ -6,7 +6,7 @@ import Register from './pages/Register';
 
 // Заглушки — будем заполнять по очереди
 import Dashboard from './pages/Dashboard';
-const MyList    = () => <div>Мой список</div>;
+import MyList from './pages/MyList';
 const Search    = () => <div>Поиск</div>;
 const Stats     = () => <div>Статистика</div>;
 const Profile   = () => <div>Профиль</div>;
