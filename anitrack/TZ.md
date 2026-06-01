@@ -1,168 +1,209 @@
-## Техническое задание
-Сервис для отслеживания просмотра аниме «AniTrack»
+# AniTrack
 
-
-### О продукте
-Мы хотим создать персональный сервис для любителей аниме, где каждый пользователь ведёт свой список просмотров. Что-то вроде личного кабинета аниме-фаната.
-
-### Что должно уметь приложение
-#### Пользователи
-- Человек должен иметь возможность зарегистрироваться и войти в аккаунт
-- У каждого пользователя своя личная коллекция, никто чужое не видит
-- Можно поменять пароль
-
-#### Поиск аниме
-
-- Пользователь вбивает название — система показывает список подходящих аниме с обложкой, описанием, жанрами и количеством эпизодов
-- Данные актуальные, не нужно их хранить у себя — берём на лету
-
-#### Личный список
-
-- Найденное аниме можно добавить к себе в список
-- У каждого аниме в списке есть статус: «Хочу посмотреть», «Смотрю», «Посмотрел», «Дропнул»
-- Можно поставить оценку от 1 до 10
-- Можно написать личную заметку — мысли после просмотра
-- Статус и оценку можно менять в любой момент
-- Аниме можно удалить из списка
-
-#### Фильтрация и сортировка
-
-- Свой список можно отфильтровать по статусу
-- Можно отсортировать по оценке или по дате добавления
-
-#### Статистика
-- Пользователь видит сводку по своей коллекции: сколько всего аниме в каждом статусе, средняя оценка, суммарное количество эпизодов просмотренного
+AniTrack — сервис для персонального отслеживания просмотра аниме.
+Пользователь ведёт собственную коллекцию, синхронизированную с внешними данными через Jikan API, без локального хранения каталога аниме.
 
 ---
 
-### Инициализация
-- Настроил dockerfile, docker-compose, env, settings(database), requirements
+## О проекте
 
-### Авторизация
-- создал приложение users
-- создаю кастомную модель
-- Для регистрации - сериализатор, представление, маршрут.
-- Для тестов в постмане создал окружение, прописал base_url и пустые refresh и access токены. Затем создавал запросы, где передавал {{bsae_url}} и {{access_token}}
-- Для входа используется встроенное представление - TokenObtainPairView
-- Для выхода поставил модуль blacklist и также встроенное представление - TokenBlacklistView
-- Для показа профиля пользователя написаны кастомные вью - UserRetrieveUpdateAPIView и сериализатор
-- Для смены пароля также кастомные вью - ChangePasswordAPIView
+Система позволяет:
 
+* искать аниме через внешний API
+* добавлять их в личную коллекцию
+* отслеживать статус просмотра
+* ставить оценки и оставлять заметки
+* получать статистику по просмотрам
 
-| Метод | Эндпоинт | Назначение | Авторизация | Примечание |
-|:---:|:---|:---|:---:|:---|
-| `POST` | `/api/auth/register/` | Регистрация | ❌ Нет | Принимает `username`, `email`, `password` |
-| `POST` | `/api/auth/login/` | Вход (получение JWT) | ❌ Нет | Возвращает пару `access` + `refresh` |
-| `POST` | `/api/auth/token/refresh/` | Обновление access-токена | ❌ Нет | Требует валидный `refresh` в теле запроса |
-| `POST` | `/api/auth/logout/` | Выход | ✅ Да | Помещает `refresh` токен в blacklist |
-| `GET` / `PATCH` | `/api/auth/me/` | Профиль текущего пользователя | ✅ Да | `GET` → данные, `PATCH` → частичное обновление |
-| `POST` | `/api/auth/change_password/` | Смена пароля | ✅ Да | Требует `old_password` + `new_password` |
+Каждый пользователь работает только со своей приватной коллекцией.
 
+---
 
+## Архитектура
 
-### models
-BaseModels:
-User
-- avatar
+Проект разделён на backend и frontend:
 
-Jikan API:
-Genre
-- title
+* Backend: Django + DRF + JWT + PostgreSQL
+* Frontend: React (Vite, TypeScript)
+* Внешние данные: Jikan API (MyAnimeList)
 
-Anime
-- mal_id
-- title
-- genres(FK Genre)
-- poster
-- episodes
+Контейнеризация: Docker + Docker Compose
+Reverse proxy: Nginx (frontend build)
 
-User Info:
-UserAnime
-- user(FK User)
-- anime(FK Anime)
-- user_note
-- user_rate
-- user_fav_character
-- user_status
-- started_at
-- finished_at
-- created_at
-- updated_at
+---
 
-### API endpoints
+## Основные возможности
 
-- GET api/anime/{mal_id}/ 
-- GET /api/anime/?search=naruto 
-- GET /api/anime/search/?q=naruto Передумал
+### Пользователи
 
-user:
-- GET api/anime/my/ 
-- GET api/anime/user/?status=PR
+* регистрация и авторизация через JWT
+* обновление токена
+* выход с blacklist refresh-токена
+* профиль пользователя
+* смена пароля
 
-- GET api/anime/my/{id}/
-- PATCH api/anime/my/{id}/
-- DELETE api/anime/my/{id}/
+---
 
-Из них получаются представления:
+### Поиск аниме
 
-UserAnimeListCreateView. Serializer -  
-UserAnimeDetailView. Serializer - UserListSerializer
+Данные не хранятся локально.
 
-Клиент отправляет:  { "mal_id": 1735, "user_status": "WW" }
-                          ↓
-Сервер проверяет: есть ли Anime с таким mal_id в БД?
-                          ↓
-          Нет → идёт в Jikan, получает данные, создаёт Anime
-          Да  → берёт существующий
-                          ↓
-          Создаёт запись UserAnime для этого пользователя
+* запрос → Jikan API
+* результат возвращается без записи в БД
+* при добавлении в коллекцию данные кешируются в `Anime`
 
-1. Пользователь ищет аниме → /api/anime/search/?q=naruto
-   └── бэкенд проксирует запрос в Jikan, возвращает результаты (в БД ничего не пишем)
+---
 
-2. Пользователь нажимает «Добавить» → POST /api/anime/my/add/  { mal_id: 1735 }
-   └── бэкенд смотрит: есть аниме в нашей БД?
-       ├── Да → берём оттуда
-       └── Нет → тянем с Jikan, сохраняем в Anime, потом создаём UserAnime
+### Личная коллекция
 
+Каждое аниме в списке пользователя содержит:
 
-docker run --rm -it \
-  -v ${PWD}:/app \
-  -w /app \
-  node:22 \
-  npm create vite@latest frontend -- --template react-ts
+* статус: `Хочу посмотреть / Смотрю / Посмотрел / Дропнул`
+* оценку (1–10)
+* заметку пользователя
+* дату начала и завершения просмотра
 
+Доступно:
 
-dockerfile frontend
-nginx conf
-docker-compose
+* добавление
+* обновление
+* удаление
+* фильтрация по статусу
+* сортировка по оценке и дате добавления
 
+---
+
+### Статистика
+
+Пользователь получает агрегированную информацию:
+
+* количество аниме по статусам
+* средняя оценка
+* общее количество просмотренных эпизодов
+
+---
+
+## API (Auth)
+
+| Method      | Endpoint                     | Description              | Auth |
+| ----------- | ---------------------------- | ------------------------ | ---- |
+| POST        | `/api/auth/register/`        | регистрация              | нет  |
+| POST        | `/api/auth/login/`           | получение JWT            | нет  |
+| POST        | `/api/auth/token/refresh/`   | обновление access токена | нет  |
+| POST        | `/api/auth/logout/`          | blacklist refresh токена | да   |
+| GET / PATCH | `/api/auth/me/`              | профиль пользователя     | да   |
+| POST        | `/api/auth/change_password/` | смена пароля             | да   |
+
+---
+
+## API (Anime)
+
+### Поиск
+
+* `GET /api/anime/{mal_id}/`
+* `GET /api/anime/?search=naruto`
+
+Поиск проксируется в Jikan API, данные не сохраняются.
+
+---
+
+### Пользовательская коллекция
+
+* `GET /api/anime/my/`
+* `GET /api/anime/user/?status=PR`
+* `GET /api/anime/my/{id}/`
+* `PATCH /api/anime/my/{id}/`
+* `DELETE /api/anime/my/{id}/`
+* `POST /api/anime/my/add/`
+
+---
+
+## Логика добавления
+
+При добавлении аниме:
+
+1. клиент отправляет `mal_id` и статус
+2. сервер проверяет наличие `Anime` в БД
+3. если нет — запрашивает Jikan API и сохраняет
+4. создаётся `UserAnime` запись для пользователя
+
+---
+
+## Модели
+
+### User
+
+* avatar
+
+### Anime
+
+* mal_id
+* title
+* genres (FK Genre)
+* poster
+* episodes
+
+### Genre
+
+* title
+
+### UserAnime
+
+* user (FK User)
+* anime (FK Anime)
+* user_note
+* user_rate
+* user_fav_character
+* user_status
+* started_at
+* finished_at
+* created_at
+* updated_at
+
+---
+
+## Frontend
+
+Инициализация:
+
+```bash
+npm create vite@latest frontend -- --template react-ts
+```
+
+Зависимости:
+
+* axios — работа с API
+* react-router-dom — маршрутизация
+* @tabler/icons-react — иконки
+
+---
+
+Сборка:
+
+```bash
+npm run build
+```
+
+---
+
+## Docker
+
+Запуск frontend:
+
+```bash
 docker run --rm -it \
   -v ${PWD}/frontend:/app \
   -w /app \
   node:22 \
-  npm run build
+  npm install
+```
 
+Сборка и перезапуск:
 
-
-docker run --rm -it \
-  -v ${PWD}/frontend:/app \
-  -w /app \
-  node:22 \
-  npm install axios react-router-dom
-
-axios — для запросов к API, react-router-dom — для навигации между страницами. Запускай и скажи когда готово.
-
-ребилд:
+```bash
 docker run --rm -it \
   -v ${PWD}/frontend:/app \
   -w /app \
   node:22 \
   npm run build && docker-compose restart nginx
-
-Установка иконок
-docker run --rm -it \
-  -v ${PWD}/frontend:/app \
-  -w /app \
-  node:22 \
-  npm install @tabler/icons-react
+```
