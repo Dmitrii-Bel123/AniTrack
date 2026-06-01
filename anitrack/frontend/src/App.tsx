@@ -3,11 +3,12 @@ import { type ReactNode } from 'react';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AnimeDetail from './pages/AnimeDetail';
 
 // Заглушки — будем заполнять по очереди
 import Dashboard from './pages/Dashboard';
 import MyList from './pages/MyList';
-const Search    = () => <div>Поиск</div>;
+import Search from './pages/Search';
 const Stats     = () => <div>Статистика</div>;
 const Profile   = () => <div>Профиль</div>;
 
@@ -35,6 +36,7 @@ export default function App() {
         {/* Защищённые — все через Layout */}
         <Route path="/"        element={<AppLayout><Dashboard /></AppLayout>} />
         <Route path="/list"    element={<AppLayout><MyList /></AppLayout>} />
+        <Route path="/list/:id" element={<AppLayout><AnimeDetail /></AppLayout>} />
         <Route path="/search"  element={<AppLayout><Search /></AppLayout>} />
         <Route path="/stats"   element={<AppLayout><Stats /></AppLayout>} />
         <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />

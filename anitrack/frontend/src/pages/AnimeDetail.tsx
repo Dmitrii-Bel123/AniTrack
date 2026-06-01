@@ -6,7 +6,9 @@ import {
 } from '@tabler/icons-react';
 import api from '../api/axios';
 import type { AxiosResponse } from 'axios';
-import { STATUS_BADGE } from '../types/index';
+
+console.log('NEW SEARCH COMPONENT');
+
 
 interface DetailData {
   mal_id: number;

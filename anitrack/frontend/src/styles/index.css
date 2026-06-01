@@ -2,3 +2,5 @@
 @import './pages/auth.css';
 @import './pages/dashboard.css';
 @import './pages/list.css';
+@import './pages/detail.css';
+@import './pages/search.css';
