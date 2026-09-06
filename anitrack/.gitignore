@@ -1,0 +1,9 @@
+.idea/
+.env
+__pycache__/
+*.pyc
+.venv/
+static/
+media/
+frontend/node_modules/
+frontend/dist/
