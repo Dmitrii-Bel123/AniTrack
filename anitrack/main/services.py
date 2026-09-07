@@ -3,7 +3,7 @@ from requests.exceptions import RequestException
 
 from .models import Anime, Genre
 
-JIKAN_API_URL = "https://api.jikan.moe/v4/"
+JIKAN_API_URL = "https://api.tenrai.org/v1/"
 
 def search_anime(query: str) -> list:
     """Поиск аниме через Jikan. Ничего не сохраняем."""
