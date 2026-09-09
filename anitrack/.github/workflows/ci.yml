@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start database
+        run: docker compose --env-file .env.ci up -d anitrack_db
+
+      - name: Django check
+        run: docker compose --env-file .env.ci run --rm anitrack python manage.py check
