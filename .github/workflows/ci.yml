@@ -15,8 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare env file
+        run: cp ../.env.ci .env
+
       - name: Start database
-        run: docker compose --env-file ../.env.ci up -d anitrack_db
+        run: docker compose --env-file .env up -d anitrack_db
 
       - name: Django check
-        run: docker compose --env-file ../.env.ci run --rm anitrack python manage.py check
+        run: docker compose -f docker-compose.yaml --env-file .env run --rm anitrack python manage.py check
