@@ -1,0 +1,296 @@
+/* ── Dashboard layout ───────────────────────────────────────── */
+.db-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.db-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.db-sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.db-actions { display: flex; gap: 10px; }
+
+/* ── Spotlight ──────────────────────────────────────────────── */
+.spotlight {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.spotlight:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.spotlight-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  filter: blur(24px) brightness(0.35) saturate(1.4);
+  transform: scale(1.1);
+}
+
+.spotlight-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(20, 30, 34, 0.2) 0%,
+    rgba(20, 30, 34, 0.7) 100%
+  );
+}
+
+.spotlight-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  width: 100%;
+}
+
+.spotlight-poster {
+  width: 88px;
+  height: 124px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  box-shadow: var(--shadow-md);
+}
+
+.spotlight-poster img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.spotlight-info { flex: 1; }
+
+.spotlight-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.spotlight-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.spotlight-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.spotlight-btns { display: flex; gap: 8px; }
+
+/* ── Метрики ────────────────────────────────────────────────── */
+.db-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+}
+
+.metric-value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+}
+
+.metric-card--accent .metric-value { color: var(--accent); }
+.metric-card--muted  .metric-value { color: var(--text-dim); }
+
+/* ── Прогресс-бар ───────────────────────────────────────────── */
+.db-progress-card { margin-bottom: 28px; }
+
+.progress-bar {
+  display: flex;
+  height: 7px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: var(--bg-deep);
+  margin: 12px 0;
+  gap: 2px;
+}
+
+.progress-seg {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seg-watched  { background: var(--accent); }
+.seg-watching { background: var(--surface-2); }
+.seg-want     { background: var(--surface); }
+.seg-dropped  { background: #7a3040; }
+
+.progress-legend { display: flex; gap: 18px; flex-wrap: wrap; }
+
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+.legend-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { color: var(--text-muted); }
+.legend-count { color: var(--text); font-weight: 600; font-family: var(--font-display); margin-left: 2px; }
+
+/* ── Секция ─────────────────────────────────────────────────── */
+.db-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.db-section-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.db-see-all {
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 500;
+  transition: color var(--transition);
+}
+.db-see-all:hover { color: var(--accent-hover); }
+
+/* ── Сетка аниме ────────────────────────────────────────────── */
+.db-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+/* ── Карточка аниме ─────────────────────────────────────────── */
+.anime-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  display: block;
+}
+
+.anime-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.anime-card__poster {
+  position: relative;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  background: var(--bg-deep);
+}
+
+.anime-card__poster img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.anime-card:hover .anime-card__poster img { transform: scale(1.05); }
+
+.anime-card__no-poster {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.anime-card__badge { position: absolute; top: 8px; left: 8px; }
+
+.anime-card__info { padding: 10px 12px; }
+
+.anime-card__title {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.anime-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.anime-card__eps  { font-size: 0.7rem; color: var(--text-dim); }
+.anime-card__rate { font-size: 0.72rem; color: var(--accent); font-weight: 600; font-family: var(--font-display); }
+
+/* ── Пустое состояние ───────────────────────────────────────── */
+.db-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 60px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.db-empty__icon { font-size: 2rem; color: var(--text-dim); }
+.db-empty__text { color: var(--text-muted); font-size: 0.9rem; }
