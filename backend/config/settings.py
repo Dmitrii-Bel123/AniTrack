@@ -21,8 +21,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
-    'main',
-    'users',
+    'apps.main',
+    'apps.users',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'anitrack.urls'
+ROOT_URLCONF = 'config.urls'
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS', 'http://localhost'
@@ -76,7 +76,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'anitrack.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 # ── База данных ───────────────────────────────────────────────
 DATABASES = {
