@@ -4,7 +4,7 @@ from decimal import Decimal
 from django.db.models import UniqueConstraint
 
 
-from users.models import User
+from apps.users.models import User
 
 
 # Create your models here.

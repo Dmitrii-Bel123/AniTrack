@@ -2,7 +2,7 @@ services:
   # ── Backend Django ─────────────────────────────────────────
   anitrack:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: anitrack
     command: >
@@ -15,7 +15,9 @@ services:
     env_file:
       - .env
     depends_on:
-      - anitrack_db
+      anitrack_db:
+        condition: service_healthy
+    restart: unless-stopped
 
   # ── База данных ────────────────────────────────────────────
   anitrack_db:
@@ -28,7 +30,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DATABASE}", "--quiet"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 3s
       timeout: 5s
       retries: 10
