@@ -1,18 +1,23 @@
 FROM python:3.13-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    PYTHONPATH=/code
+
+# Берём готовый бинарник uv, а не ставим его через pip
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /usr/local/bin/
 
 WORKDIR /code
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Кладём только манифесты, чтобы слой с зависимостями кешировался
+# отдельно от кода и не пересобирался на каждое изменение файлов проекта
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-install-project --no-dev
 
 COPY . .
+RUN uv sync --locked --no-dev
 
-# На всякий случай, если вдруг понадобится
-ENV PYTHONPATH=/code
+# Дальше используем venv, который создал uv
+ENV PATH="/code/.venv/bin:$PATH"

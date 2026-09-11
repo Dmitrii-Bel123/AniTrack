@@ -1,0 +1,25 @@
+[project]
+name = "anitrack"
+version = "0.1.0"
+description = "AniTrack backend"
+requires-python = ">=3.13"
+dependencies = [
+    "django==5.2.1",
+    "djangorestframework==3.17.1",
+    "djangorestframework-simplejwt==5.5.1",
+    "django-filter==25.2",
+    "drf-spectacular==0.29.0",
+    "gunicorn>=26.2.0",
+    "pillow==12.2.0",
+    "psycopg[binary]>=3.3.5",
+    "requests==2.34.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+]
+
+[tool.uv]
+package = false

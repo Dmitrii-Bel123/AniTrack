@@ -2,10 +2,11 @@ services:
 
   anitrack:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     volumes:
-      - .:/code
+      - ./backend:/code
+      - anitrack_venv:/code/.venv  # чтобы бинд-маунт не перекрывал venv, собранный в образе
     environment:
       - DEBUG=True
     ports:
@@ -13,3 +14,6 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  anitrack_venv:
