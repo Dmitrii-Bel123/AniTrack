@@ -2,7 +2,13 @@ from datetime import timedelta
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Локально .env никто не прокидывает в окружение сам (в отличие от
+# docker-compose с его env_file:) — читаем файл явно, если он есть.
+load_dotenv(BASE_DIR.parent / '.env')
 
 # ── Безопасность ──────────────────────────────────────────────
 SECRET_KEY = os.environ.get('SECRET_KEY')
