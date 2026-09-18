@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
+    'django_filters',
     'apps.main',
     'apps.users',
 ]
@@ -83,6 +84,35 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'main_formatter': {
+            'format': '{asctime} - {levelname} - {module} - {filename} - {message}',
+            'style': '{',
+        }
+    },
+
+    'handlers': {
+        'main_file': {
+            'level': DEBUG,
+            'class': 'logging.FileHandler',
+            'formatter': 'main_formatter',
+            'filename': os.path.join(BASE_DIR, 'log/general.log') ,
+        }
+    },
+
+    'loggers': {
+        '': {
+            'handlers': ['main_file'],
+            'level': DEBUG,
+            'propagate': True,
+        }
+    }
+}
 
 # ── База данных ───────────────────────────────────────────────
 DATABASES = {

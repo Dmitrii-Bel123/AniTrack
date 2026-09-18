@@ -1,13 +1,10 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from decimal import Decimal
-from django.db.models import UniqueConstraint
 
 
 from apps.users.models import User
 
-
-# Create your models here.
 
 class Genre(models.Model):
     title = models.CharField(max_length=255)
@@ -24,7 +21,6 @@ class Anime(models.Model):
 
     def __str__(self):
         return self.title
-
 
 
 class UserAnime(models.Model):
@@ -57,13 +53,3 @@ class UserAnime(models.Model):
                 name='unique_user_anime'
             )
         ]
-
-
-
-
-    # title_english = models.CharField(max_length=255, null=True, verbose_name='Английское название')
-    # title_japanese = models.CharField(max_length=255, null=True, verbose_name='Оригинальное название')
-    # aired = models.IntegerField(null=True, blank=True, verbose_name='Год выпуска')
-    # rating = models.FloatField(null=True, blank=True, verbose_name='Общий рейтинг')
-    # "status": "Currently Airing",
-

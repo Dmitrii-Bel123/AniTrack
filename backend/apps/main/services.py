@@ -1,7 +1,9 @@
 import requests
-from requests.exceptions import RequestException
+import logging
 
 from .models import Anime, Genre
+
+logger = logging.getLogger(__name__)
 
 JIKAN_API_URL = "https://api.tenrai.org/v1/"
 
@@ -12,15 +14,16 @@ def search_anime(query: str) -> list:
         response = requests.get(f'{JIKAN_API_URL}anime/', params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
+        logger.info(f"Получили data: {data}")
         return data.get("data", [])
     except requests.RequestException as e:
-        print(f'API error: {e}')
+        logger.warning(f"API error: {e}")
         return []
 
 
 def fetch_anime_detail(mal_id: int) -> dict:
     """Получить полные данные об аниме по mal_id."""
-    url = f'{JIKAN_API_URL}/anime/{mal_id}/'
+    url = f'{JIKAN_API_URL}anime/{mal_id}/'
 
     try:
         response = requests.get(url, timeout=10)
@@ -28,7 +31,7 @@ def fetch_anime_detail(mal_id: int) -> dict:
         data=response.json()
         return data.get("data", {})
     except requests.RequestException as e:
-        print(f'API error: {e}')
+        logger.warning(f"API error: {e}")
         return {}
 
 
@@ -42,7 +45,7 @@ def get_or_create_anime(mal_id: int) -> Anime:
         anime = Anime.objects.get(mal_id=mal_id)
         return anime
     except Anime.DoesNotExist:
-        print(">>> [3] в БД нет, идём в Jikan")
+        logger.info(f"В БД нет, идём в Jikan")
 
     api_data = fetch_anime_detail(mal_id)
 
