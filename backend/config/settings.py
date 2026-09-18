@@ -97,7 +97,7 @@ LOGGING = {
     },
 
     'handlers': {
-        'main_file': {
+        'file': {
             'level': DEBUG,
             'class': 'logging.FileHandler',
             'formatter': 'main_formatter',
@@ -107,7 +107,7 @@ LOGGING = {
 
     'loggers': {
         '': {
-            'handlers': ['main_file'],
+            'handlers': ['file'],
             'level': DEBUG,
             'propagate': True,
         }
