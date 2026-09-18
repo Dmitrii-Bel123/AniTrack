@@ -14,7 +14,7 @@ def search_anime(query: str) -> list:
         response = requests.get(f'{JIKAN_API_URL}anime/', params=params, timeout=10)
         response.raise_for_status()
         data = response.json()
-        logger.info(f"Получили data: {data}")
+        logger.info(f"Получили data: !!!!!!!!!!!!!!!!!!!!")
         return data.get("data", [])
     except requests.RequestException as e:
         logger.warning(f"API error: {e}")

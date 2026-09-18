@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOG_DIR = BASE_DIR / 'log'
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Локально .env никто не прокидывает в окружение сам (в отличие от
 # docker-compose с его env_file:) — читаем файл явно, если он есть.
@@ -98,18 +100,28 @@ LOGGING = {
 
     'handlers': {
         'file': {
-            'level': DEBUG,
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'main_formatter',
-            'filename': os.path.join(BASE_DIR, 'log/general.log') ,
-        }
+            'filename': LOG_DIR / 'general.log',
+            'encoding': 'utf-8',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'main_formatter',
+        },
     },
 
     'loggers': {
         '': {
-            'handlers': ['file'],
-            'level': DEBUG,
-            'propagate': True,
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+        },
+        'apps': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
         }
     }
 }
