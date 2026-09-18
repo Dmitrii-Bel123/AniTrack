@@ -1,0 +1,31 @@
+# Окружение и секреты
+.env
+*.env
+**/.env
+
+# Системные файлы macOS
+.DS_Store
+**/.DS_Store
+
+# Логи
+log/
+*.log
+**/log/
+
+# Python и виртуальные окружения
+.venv/
+venv/
+**/__pycache__/
+*.pyc
+
+# Настройки IDE
+.idea/
+.vscode/
+
+# Статика и медиа
+backend/media/
+backend/static/
+
+# Фронтенд
+frontend/node_modules/
+frontend/dist/
