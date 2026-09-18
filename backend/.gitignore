@@ -1,8 +1,23 @@
 .idea/
-.env
 __pycache__/
 *.pyc
+
+# Переменные окружения и секреты
+.env
+.env.*
+
+# Системные файлы macOS
+.DS_Store
+**/.DS_Store
+
+# Логи
+log/
+*.log
+
+# Виртуальные окружения
 .venv/
+venv/
+
 static/
 media/
 frontend/node_modules/
