@@ -1,6 +1,8 @@
 import requests
 import logging
 
+from django.db import IntegrityError, transaction
+
 from .models import Anime, Genre
 
 logger = logging.getLogger(__name__)
@@ -49,17 +51,23 @@ def get_or_create_anime(mal_id: int) -> Anime:
 
     api_data = fetch_anime_detail(mal_id)
 
-    genres = []
-    for genre_data in api_data.get("genres", []):
-        genre, _ = Genre.objects.get_or_create(title=genre_data["name"])
-        genres.append(genre)
+    try:
+        with transaction.atomic():
+            anime = Anime.objects.create(
+                mal_id=api_data['mal_id'],
+                title=api_data['title'],
+                poster=api_data.get('images', {}).get('jpg', {}).get('image_url', ""),
+                episodes=api_data.get('episodes') or 0,
+            )
 
-    anime = Anime.objects.create(
-        mal_id=api_data['mal_id'],
-        title=api_data['title'],
-        poster=api_data.get('images', {}).get('jpg', {}).get('image_url', ""),
-        episodes=api_data.get('episodes') or 0,
-    )
-    anime.genres.set(genres)
+            genres = []
+            for genre_data in api_data.get("genres", []):
+                genre, _ = Genre.objects.get_or_create(title=genre_data["name"])
+                genres.append(genre)
 
-    return anime
+            anime.genres.set(genres)
+            return anime
+
+    except IntegrityError:
+        logger.warning(f'!!! Race condition !!!')
+        return Anime.objects.get(mal_id=mal_id)
