@@ -6,7 +6,7 @@ npm run dev
 Что делать дальше:
 
 1. Тесты
-2. Переписать print -> logging
+2. Переписать print -> logging. Готово.
 3. Защитить get_or_create_anime от гонки 
 4. get_serializer_class возвращает None.
 5. AddAnimeToListView не тот код возвращает

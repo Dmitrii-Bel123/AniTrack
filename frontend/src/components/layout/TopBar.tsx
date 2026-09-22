@@ -3,6 +3,7 @@ import { IconBell } from '@tabler/icons-react';
 import api from '../../api/axios';
 import type { AxiosResponse } from 'axios';
 import type { Stats, User } from '../../types/index';
+import { Link } from 'react-router-dom';
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -44,12 +45,12 @@ export default function TopBar() {
             <IconBell size={18} stroke={1.75} />
           </button>
 
-          <div className="topbar-avatar" title={user?.username}>
+          <Link to="/profile" className="topbar-avatar" title={user?.username}>
             {user?.avatar
               ? <img src={user.avatar} alt="avatar" />
               : <span>{user?.username?.[0]?.toUpperCase() ?? '?'}</span>
             }
-          </div>
+          </Link>
         </div>
       </header>
 

@@ -1,0 +1,128 @@
+/* ── Profile page ───────────────────────────────────────────── */
+.profile-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.profile-left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-section-title { margin-bottom: 16px; }
+
+/* ── Карточка аватара ───────────────────────────────────────── */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.8rem;
+  border: 2px solid var(--border);
+  transition: border-color var(--transition);
+  position: relative;
+}
+
+.profile-avatar-wrap:hover .profile-avatar { border-color: var(--border-hover); }
+
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.profile-avatar__spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 22px !important;
+  height: 22px !important;
+  background: rgba(20, 30, 34, 0.55);
+  border-radius: 50%;
+  padding: 6px;
+  box-sizing: content-box;
+}
+
+.profile-avatar-edit {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-card);
+  transition: background var(--transition);
+}
+
+.profile-avatar-wrap:hover .profile-avatar-edit { background: var(--accent-hover); }
+
+.profile-username {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.profile-email {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── Быстрая статистика ────────────────────────────────────── */
+.profile-quickstats { display: flex; flex-direction: column; gap: 2px; }
+
+.qs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.qs-row:last-child { border-bottom: none; }
+
+.qs-label { font-size: 0.82rem; color: var(--text-muted); }
+.qs-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.qs-value--accent { color: var(--accent); }
+
+@media (max-width: 800px) {
+  .profile-layout { grid-template-columns: 1fr; }
+}

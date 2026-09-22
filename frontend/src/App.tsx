@@ -5,12 +5,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AnimeDetail from './pages/AnimeDetail';
 
-// Заглушки — будем заполнять по очереди
 import Dashboard from './pages/Dashboard';
 import MyList from './pages/MyList';
 import Search from './pages/Search';
-const Stats     = () => <div>Статистика</div>;
-const Profile   = () => <div>Профиль</div>;
+import Stats from './pages/Stats';
+import Profile from './pages/Profile';
 
 function PrivateRoute({ children }: { children: ReactNode }) {
   const token = localStorage.getItem('access');
