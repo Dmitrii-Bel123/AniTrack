@@ -4,9 +4,6 @@ import pytest
 Моковые данные
 """
 
-# Фикстура - фейк пэйлоад с jikan.
-# def jikan_anime_payload
-
 @pytest.fixture
 def jikan_anime_payload():
     payload = {
