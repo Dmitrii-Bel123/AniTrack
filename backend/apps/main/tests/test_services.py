@@ -1,5 +1,4 @@
 import time
-from asyncio import as_completed
 
 import pytest
 
@@ -32,14 +31,6 @@ def test_get_or_create_anime_concurrent(mocker, jikan_anime_payload):
 
     assert Anime.objects.filter(mal_id=mal_id).count() == 1
     # 2. Проверяем возвращаемый объект: все 5 вызовов вернули один и тот же id
-    assert all(a.id == results[0] for a in futures)
+    assert all(a.id == results[0].id for a in results)
     # 3. Проверяем M2M связи: жанры привязались корректно
     assert results[0].genres.count() == 2
-
-
-
-    anime = Anime.objects.create()
-
-
-    print(jikan_anime_payload)
-    assert jikan_anime_payload["mal_id"] == 9999
