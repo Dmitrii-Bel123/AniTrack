@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>AniTrack — архитектура</title>
+<style>
+  body { margin:0; background:#0f1420; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:#e6ebf5; }
+  h1 { font-size:20px; margin:18px 24px 4px; font-weight:600; }
+  p.sub { margin:0 24px 14px; color:#8b96ad; font-size:13px; }
+  svg { display:block; margin:0 auto; }
+  .box { fill:#1a2233; stroke:#33415e; stroke-width:1.5; rx:10; }
+  .box-ext { fill:#231a2e; stroke:#4e3a63; stroke-width:1.5; }
+  .title { fill:#e6ebf5; font-size:15px; font-weight:600; }
+  .small { fill:#9aa7c2; font-size:11.5px; }
+  .mono { fill:#7dd3fc; font-size:11.5px; font-family: ui-monospace, Menlo, monospace; }
+  .arrow { stroke:#5b6b8c; stroke-width:1.6; fill:none; marker-end:url(#arr); }
+  .arrow-ext { stroke:#a78bfa; stroke-width:1.6; stroke-dasharray:6 4; fill:none; marker-end:url(#arrv); }
+  .label { fill:#7c8aa5; font-size:11px; }
+  .legend { font-size:12px; fill:#8b96ad; }
+</style>
+</head>
+<body>
+<h1>AniTrack — как работает проект</h1>
+<p class="sub">React SPA + Django REST Framework + PostgreSQL + Jikan API · docker compose</p>
+
+<svg width="1060" height="640" viewBox="0 0 1060 640">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#5b6b8c"/>
+    </marker>
+    <marker id="arrv" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+
+  <!-- ═══ CLIENT ═══ -->
+  <rect class="box" x="330" y="20" width="400" height="120" rx="10"/>
+  <text class="title" x="530" y="46" text-anchor="middle">Браузер — React SPA (Vite + TS)</text>
+  <text class="small" x="530" y="68" text-anchor="middle">Страницы:</text>
+    <text class="small" x="530" y="88" text-anchor="middle">Dashboard · Search · MyList · AnimeDetail · Stats · Profile · Login/Reg</text>
+  <text class="small" x="530" y="108" text-anchor="middle">axios-клиент с JWT в storage → заголовок Authorization</text>
+  <text class="mono" x="530" y="130" text-anchor="middle">frontend/ → nginx (статика, try_files → index.html)</text>
+
+  <!-- ═══ NGINX ═══ -->
+  <rect class="box" x="330" y="185" width="400" height="150" rx="10"/>
+  <text class="title" x="530" y="210" text-anchor="middle">Nginx — сервис «web», порт 80</text>
+  <text class="mono" x="350" y="236">/api/     → proxy_pass http://anitrack:8000</text>
+  <text class="mono" x="350" y="258">/admin/   → proxy_pass http://anitrack:8000</text>
+  <text class="mono" x="350" y="280">/static/  → /vol/static/  (shared volume)</text>
+  <text class="mono" x="350" y="302">/media/   → /vol/media/   (shared volume)</text>
+  <text class="mono" x="350" y="324">/         → React SPA (index.html)</text>
+
+  <!-- arrow browser -> nginx -->
+  <path class="arrow" d="M530,140 L530,183"/>
+  <text class="label" x="545" y="166">HTTP :80</text>
+
+  <!-- ═══ DJANGO ═══ -->
+  <rect class="box" x="60" y="385" width="560" height="210" rx="10"/>
+  <text class="title" x="340" y="410" text-anchor="middle">Django 5.2 + DRF — сервис «anitrack», :8000 (gunicorn, 3 workers)</text>
+
+  <text class="mono" x="80" y="440">/api/auth/   login · token/refresh · logout · register · me · change_password</text>
+  <text class="mono" x="80" y="462">/api/anime/  my/ · my/&lt;pk&gt;/ · search/ · my/add/ · my/stat/</text>
+  <text class="mono" x="80" y="484">/api/docs/   Swagger UI (drf-spectacular) · /admin/ — админка</text>
+
+  <text class="small" x="80" y="512">apps.users → User (AbstractUser) · JWT: access 15 мин / refresh 7 дней, blacklist</text>
+  <text class="small" x="80" y="532">apps.main  → Anime · Genre · UserAnime (уникальность user+anime, статусы WW/PR/WD/DR)</text>
+  <text class="small" x="80" y="552">services.py: search_anime · fetch_anime_detail · get_or_create_anime (защита от гонки)</text>
+  <text class="small" x="80" y="572">views.py: список с filter/order/search, статистика (Count/Avg/Sum), detail дополняется из Jikan</text>
+
+  <!-- ═══ EXTERNAL API ═══ -->
+  <rect class="box-ext" x="700" y="385" width="320" height="120" rx="10"/>
+  <text class="title" x="870" y="412" text-anchor="middle">Jikan API (внешний)</text>
+  <text class="mono" x="810" y="438">api.tenrai.org/v1/</text>
+  <text class="small" x="870" y="460" text-anchor="middle">GET /anime/?q=…&amp;limit=10 — поиск</text>
+  <text class="small" x="870" y="480" text-anchor="middle">GET /anime/{mal_id}/ — детали</text>
+
+  <path class="arrow-ext" d="M620,460 L697,460"/>
+  <text class="label" x="635" y="448">requests</text>
+
+  <!-- arrow nginx -> django -->
+  <path class="arrow" d="M480,335 L480,383"/>
+  <text class="label" x="490" y="361">/api/, /admin/</text>
+
+  <!-- ═══ DATABASE ═══ -->
+  <rect class="box" x="60" y="650" width="0" height="0" rx="0"/>
+  <rect class="box" x="940" y="540" width="0" height="0" rx="0"/>
+
+  <!-- DB moved to bottom center-right -->
+  <rect class="box" x="710" y="540" width="300" height="90" rx="10"/>
+  <text class="title" x="860" y="566" text-anchor="middle">PostgreSQL 16 — «anitrack_db»</text>
+  <text class="small" x="860" y="588" text-anchor="middle">БД anitrack · healthcheck pg_isready</text>
+  <text class="small" x="860" y="608" text-anchor="middle">volume postgres_data</text>
+
+  <path class="arrow" d="M620,570 L708,570"/>
+  <text class="label" x="640" y="560">psycopg</text>
+
+  <!-- volumes note -->
+  <rect class="box" x="60" y="610" width="0" height="0" rx="0"/>
+  <text class="legend" x="60" y="630">Тома: postgres_data (БД) · static_volume + media_volume (общие между anitrack и web)</text>
+</svg>
+</body>
+</html>
