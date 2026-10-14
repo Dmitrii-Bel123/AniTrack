@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconCheck } from '@tabler/icons-react';
 import api from '../api/axios';
 import type { AxiosResponse } from 'axios';
@@ -15,7 +16,8 @@ interface SearchResult {
 interface AddedMap { [mal_id: number]: 'adding' | 'added' | 'exists'; }
 
 export default function Search() {
-  const [query,   setQuery]   = useState('');
+  const [params] = useSearchParams();
+  const [query,   setQuery]   = useState(params.get('q') ?? '');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
@@ -66,6 +68,15 @@ export default function Search() {
       }
     }
   };
+
+  // Переход из коллекции: /search?q=... запускает поиск сразу
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (autoRan.current || !params.get('q')) return;
+    autoRan.current = true;
+    handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="search-page fade-in">

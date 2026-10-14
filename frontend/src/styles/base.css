@@ -1,0 +1,74 @@
+/* ═══ AniTrack · базовые токены и каркас ═══════════════════════
+   Подключается ПОСЛЕ старых стилей и переопределяет их переменные,
+   поэтому страницы, которые ещё не переработаны, остаются рабочими
+   (просто в новой светлой палитре). */
+
+:root {
+  /* Слои: страница → панель → карточка. Глубина только тоном, без теней */
+  --paper:  #F3F1ED;
+  --panel:  #E9E6E0;
+  --card:   #FFFFFF;
+  --ink:    #16161A;
+  --ink-2:  #6B6A66;
+  --ink-3:  #9A978F;
+  --rule:   #D9D5CC;
+  --cobalt: #2B3FE0;
+
+  --font: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r: 2px;
+
+  /* Совместимость со старыми страницами */
+  --bg: var(--paper);  --bg-deep: var(--paper);  --bg-card: var(--card);
+  --bg-hover: var(--panel);  --surface: var(--panel);  --surface-2: var(--rule);
+  --accent: var(--cobalt);  --accent-dim: rgba(43, 63, 224, .10);  --accent-hover: #1F31C4;
+  --text: var(--ink);  --text-muted: var(--ink-2);  --text-dim: var(--ink-3);
+  --border: var(--rule);  --border-hover: var(--cobalt);
+  --shadow-sm: none;  --shadow-md: none;  --shadow-lg: none;
+  --radius-sm: var(--r);  --radius-md: var(--r);  --radius-lg: var(--r);
+  --font-display: var(--font);  --font-body: var(--font);
+}
+
+body { font-family: var(--font); background: var(--paper); color: var(--ink); }
+::-webkit-scrollbar-thumb { border-radius: 0; }
+
+/* Старые компоненты: убираем скругления и свечение */
+.btn { border-radius: var(--r); }
+.btn-primary:hover { transform: none; box-shadow: none; }
+.card:hover { box-shadow: none; }
+.badge { border-radius: var(--r); }
+.badge-watching { background: var(--cobalt); color: #fff; }
+.badge-watched  { background: var(--ink); color: #fff; }
+.badge-want     { background: transparent; color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--rule); }
+.badge-dropped  { background: transparent; color: var(--ink-3); box-shadow: inset 0 0 0 1px var(--rule); }
+
+/* ── Каркас: верхняя полоса вместо сайдбара ── */
+.shell-head {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+.shell-head__in {
+  max-width: 1280px; margin: 0 auto; padding: 0 40px;
+  height: 64px; display: flex; align-items: center; gap: 48px;
+}
+.wordmark {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 17px; letter-spacing: -0.01em;
+}
+.wordmark::before { content: ''; width: 10px; height: 10px; background: var(--cobalt); }
+.shell-nav { display: flex; gap: 28px; height: 100%; flex: 1; }
+.shell-nav a, .shell-out {
+  display: flex; align-items: center; height: 100%;
+  font: 600 11px/1 var(--font); letter-spacing: .09em; text-transform: uppercase;
+  color: var(--ink-2); background: none; border: 0; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color .15s;
+}
+.shell-nav a:hover, .shell-out:hover { color: var(--ink); }
+.shell-nav a.is-active { color: var(--ink); border-bottom-color: var(--cobalt); }
+.shell-body { max-width: 1280px; margin: 0 auto; padding: 56px 40px 96px; }
+
+@media (max-width: 760px) {
+  .shell-head__in { padding: 0 16px; gap: 16px; overflow-x: auto; }
+  .shell-nav { gap: 16px; }
+  .shell-body { padding: 32px 16px 64px; }
+}

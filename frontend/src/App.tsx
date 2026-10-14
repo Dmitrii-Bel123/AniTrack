@@ -5,7 +5,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AnimeDetail from './pages/AnimeDetail';
 
-import Dashboard from './pages/Dashboard';
 import MyList from './pages/MyList';
 import Search from './pages/Search';
 import Stats from './pages/Stats';
@@ -33,8 +32,8 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Защищённые — все через Layout */}
-        <Route path="/"        element={<AppLayout><Dashboard /></AppLayout>} />
-        <Route path="/list"    element={<AppLayout><MyList /></AppLayout>} />
+        <Route path="/"        element={<AppLayout><MyList /></AppLayout>} />
+        <Route path="/list"    element={<Navigate to="/" replace />} />
         <Route path="/list/:id" element={<AppLayout><AnimeDetail /></AppLayout>} />
         <Route path="/search"  element={<AppLayout><Search /></AppLayout>} />
         <Route path="/stats"   element={<AppLayout><Stats /></AppLayout>} />
