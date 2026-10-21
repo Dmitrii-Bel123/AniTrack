@@ -29,7 +29,7 @@ jobs:
         run: docker compose up -d --build
 
       - name: Run tests
-        run: docker compose -T exec pytest
+        run: docker compose exec -T backend pytest
 
       - name: Stop containers
         if: always()
