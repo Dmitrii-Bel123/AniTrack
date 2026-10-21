@@ -27,7 +27,7 @@ jobs:
 
       - name: Django check
 #        run: docker compose -f docker-compose.yml --env-file .env run --rm anitrack python manage.py check
-        run: docker compose exec -T uv run python manage.py check
+        run: docker compose exec -T anitrack uv run python manage.py check
 
       - name: Run tests
         run: docker compose exec -T anitrack uv run pytest
