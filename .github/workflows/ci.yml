@@ -2,7 +2,11 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
 
 jobs:
   check:
@@ -10,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Скачали код с репозитория на машину
 
       - name: Prepare env file
         run: cp .env.ci .env
@@ -21,5 +25,12 @@ jobs:
       - name: Django check
         run: docker compose -f docker-compose.yml --env-file .env run --rm anitrack python manage.py check
 
-      - name: Start test
-        run: docker compose pytest
+      - name: Start containers
+        run: docker compose up -d --build
+
+      - name: Run tests
+        run: docker compose -T exec pytest
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
