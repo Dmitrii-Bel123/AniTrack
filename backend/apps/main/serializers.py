@@ -40,7 +40,7 @@ class UserAnimeListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserAnime
-        fields = ['id', 'anime', 'user_rate', 'user_status']
+        fields = ['id', 'anime', 'user_rate', 'user_status', 'created_at']
         read_only_fields = ['id']
 
 

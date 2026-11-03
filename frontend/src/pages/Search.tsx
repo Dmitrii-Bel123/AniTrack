@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { IconSearch, IconPlus, IconCheck } from '@tabler/icons-react';
 import api from '../api/axios';
 import type { AxiosResponse } from 'axios';
@@ -15,13 +15,14 @@ interface SearchResult {
 
 interface AddedMap { [mal_id: number]: 'adding' | 'added' | 'exists'; }
 
-export default function Search() {
+export default function Search({ onAdded }: { onAdded?: () => void }) {
   const [params] = useSearchParams();
   const [query,   setQuery]   = useState(params.get('q') ?? '');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
   const [added,   setAdded]   = useState<AddedMap>({});
+  const [entryIds, setEntryIds] = useState<Record<number, number>>({});
   const [searched, setSearched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,25 +48,26 @@ export default function Search() {
   };
 
   const handleAdd = async (mal_id: number, status = 'WW') => {
+    setError('');
     setAdded(prev => ({ ...prev, [mal_id]: 'adding' }));
     try {
-      await api.post('/anime/my/add/', { mal_id, user_status: status });
-      setAdded(prev => ({ ...prev, [mal_id]: 'added' }));
-    } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === 'object' &&
-        'response' in err &&
-        (err as { response: { status: number } }).response?.status === 200
-      ) {
+      const response = await api.post('/anime/my/add/', { mal_id, user_status: status });
+      if (response.status === 201 && response.data.id) {
+        onAdded?.();
+        setEntryIds(prev => ({ ...prev, [mal_id]: response.data.id }));
+        setAdded(prev => ({ ...prev, [mal_id]: 'added' }));
+      } else if (response.data.detail === 'Аниме уже есть в вашем списке') {
         setAdded(prev => ({ ...prev, [mal_id]: 'exists' }));
       } else {
-        setAdded(prev => {
-          const next = { ...prev };
-          delete next[mal_id];
-          return next;
-        });
+        throw new Error('add failed');
       }
+    } catch {
+      setError('Не удалось добавить тайтл. Попробуй ещё раз.');
+      setAdded(prev => {
+        const next = { ...prev };
+        delete next[mal_id];
+        return next;
+      });
     }
   };
 
@@ -83,7 +85,8 @@ export default function Search() {
 
       {/* Заголовок */}
       <div className="search-hero">
-        <h2 className="db-heading">Поиск аниме</h2>
+        <p className="kicker">Моя коллекция</p>
+        <div className="page-heading"><h1>Добавить аниме</h1></div>
         <p className="db-sub">Ищи по базе MyAnimeList и добавляй в свой список</p>
       </div>
 
@@ -94,7 +97,7 @@ export default function Search() {
           <input
             ref={inputRef}
             className="search-bar__input"
-            placeholder="Название аниме..."
+            aria-label="Название аниме" placeholder="Название аниме…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoFocus
@@ -102,7 +105,7 @@ export default function Search() {
           {query && (
             <button
               type="button"
-              className="search-bar__clear"
+              className="search-bar__clear" aria-label="Очистить поиск"
               onClick={() => { setQuery(''); setResults([]); setSearched(false); inputRef.current?.focus(); }}
             >
               ✕
@@ -152,7 +155,7 @@ export default function Search() {
                   <div className="search-card__poster">
                     {item.poster
                       ? <img src={item.poster} alt={item.title} />
-                      : <div className="search-card__no-img">No Image</div>
+                      : <div className="search-card__no-img">Без обложки</div>
                     }
                   </div>
                   <div className="search-card__body">
@@ -182,8 +185,10 @@ export default function Search() {
                       {state === 'adding' && <span className="spinner" style={{ width:13, height:13 }} />}
                       {state === 'added'  && <><IconCheck size={13} stroke={2} /> Добавлено</>}
                       {state === 'exists' && 'Уже в списке'}
-                      {!state            && <><IconPlus  size={13} stroke={2} /> В список</>}
+                      {!state            && <><IconPlus  size={13} stroke={2} /> В планы</>}
                     </button>
+                    {entryIds[item.mal_id] && <Link className="col-link" to={`/list/${entryIds[item.mal_id]}`}>О тайтле →</Link>}
+                    {state === 'exists' && <Link className="col-link" to="/" onClick={e => e.currentTarget.closest('dialog')?.close()}>Открыть коллекцию →</Link>}
                   </div>
                 </div>
               );

@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 const NAV = [
   { to: '/',        label: 'Коллекция',  end: true },
-  { to: '/search',  label: 'Поиск' },
   { to: '/stats',   label: 'Статистика' },
   { to: '/profile', label: 'Профиль' },
 ];

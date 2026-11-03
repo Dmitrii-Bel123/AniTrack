@@ -1,57 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IconPlus, IconStar } from '@tabler/icons-react';
 import api from '../api/axios';
-import type { AxiosResponse } from 'axios';
+import { fetchCollection } from '../api/collection';
 import type { Stats, UserAnime } from '../types/index';
 import { STATUS_BADGE, STATUS_LABEL } from '../types/index';
-
-// ── Анимированный счётчик (как на Dashboard) ──────────────────
-function useCountUp(target: number, duration = 800) {
-  const [val, setVal] = useState(0);
-  useEffect(() => {
-    if (target === 0) { setVal(0); return; }
-    let start: number | null = null;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const progress = Math.min((ts - start) / duration, 1);
-      setVal(Math.floor(progress * target));
-      if (progress < 1) requestAnimationFrame(step);
-      else setVal(target);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration]);
-  return val;
-}
-
-function MetricCard({ label, value, accent, muted, float, suffix }: {
-  label: string;
-  value: number;
-  accent?: boolean;
-  muted?: boolean;
-  float?: boolean;
-  suffix?: string;
-}) {
-  const animated = useCountUp(float ? 0 : value);
-  return (
-    <div className={`metric-card card ${accent ? 'metric-card--accent' : ''} ${muted ? 'metric-card--muted' : ''}`}>
-      <span className="metric-value">
-        {float ? (value > 0 ? value.toFixed(1) : '—') : animated}{suffix}
-      </span>
-      <span className="metric-label">{label}</span>
-    </div>
-  );
-}
-
-function LegendItem({ color, label, count }: { color: string; label: string; count: number }) {
-  return (
-    <div className="legend-item">
-      <span className="legend-dot" style={{ background: color }} />
-      <span className="legend-label">{label}</span>
-      <span className="legend-count">{count}</span>
-    </div>
-  );
-}
 
 const MONTHS_RU = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
 
@@ -69,48 +22,39 @@ export default function StatsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [items, setItems] = useState<UserAnime[]>([]);
   const [loading, setLoading] = useState(true);
-  const hasFetched = useRef(false);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    const controller = new AbortController();
+    const { signal } = controller;
+    Promise.all([api.get<Stats>('/anime/my/stat/', { signal }), fetchCollection(signal)])
+      .then(([summary, collection]) => {
+        if (signal.aborted) return;
+        setStats(summary.data);
+        setItems(collection);
+      })
+      .catch(() => { if (!signal.aborted) setFailed(true); })
+      .finally(() => { if (!signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [attempt]);
 
-    Promise.all([
-      api.get('/anime/my/stat/'),
-      api.get('/anime/my/?ordering=created_at'),
-    ]).then(([sRes, lRes]: [AxiosResponse<Stats>, AxiosResponse<UserAnime[] | { results: UserAnime[] }>]) => {
-      setStats(sRes.data);
-      const data = lRes.data;
-      setItems(Array.isArray(data) ? data : (data.results ?? []));
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  const heading = <header className="insights-heading">
+    <p>Моя коллекция</p><h1>Статистика</h1>
+  </header>;
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <span className="spinner" style={{ width: 32, height: 32 }} />
-      </div>
-    );
-  }
-
-  if (!stats || stats.total_anime === 0) {
-    return (
-      <div className="stats-page fade-in">
-        <div className="db-hero">
-          <div>
-            <h2 className="db-heading">Статистика</h2>
-            <p className="db-sub">Аналитика твоей коллекции</p>
-          </div>
-        </div>
-        <div className="db-empty card">
-          <p className="db-empty__icon">◎</p>
-          <p className="db-empty__text">Пока нечего анализировать — добавь первое аниме</p>
-          <Link to="/search" className="btn btn-primary">
-            <IconPlus size={16} stroke={2} /> Найти аниме
-          </Link>
-        </div>
-      </div>
-    );
+  if (loading || failed || !stats?.total_anime) {
+    return <div className="insights">{heading}
+      <section className="insights-state">
+        {loading ? <p role="status">Загружаю статистику…</p> : failed ?
+          <><p role="alert">Не удалось загрузить статистику.</p>
+            <button className="btn btn-primary" onClick={() => {
+              setFailed(false); setLoading(true); setAttempt(n => n + 1);
+            }}>Повторить</button></> :
+          <><h2>Коллекция пока пуста</h2><p>Добавь первое аниме, и здесь появится статистика.</p>
+            <Link to="/search" className="btn btn-primary"><IconPlus size={16} /> Добавить аниме</Link></>}
+      </section>
+    </div>;
   }
 
   // ── Жанры ──────────────────────────────────────────────────
@@ -149,72 +93,42 @@ export default function StatsPage() {
     .sort((a, b) => Number(b.user_rate) - Number(a.user_rate))
     .slice(0, 5);
 
-  const hoursWatched = stats.total_episodes ? Math.round(stats.total_episodes * 24 / 60) : 0;
+  const statuses = [
+    ['PR', stats.watching], ['WW', stats.want], ['WD', stats.watched], ['DR', stats.dropped],
+  ] as const;
 
   return (
-    <div className="stats-page fade-in">
-
-      <div className="db-hero">
-        <div>
-          <h2 className="db-heading">Статистика</h2>
-          <p className="db-sub">Аналитика твоей коллекции</p>
-        </div>
-      </div>
-
-      {/* Метрики */}
-      <div className="db-metrics">
-        <MetricCard label="Всего аниме"    value={stats.total_anime} />
-        <MetricCard label="Просмотрено"    value={stats.watched} />
-        <MetricCard label="Смотрю"         value={stats.watching} accent />
-        <MetricCard label="Планирую"       value={stats.want} />
-        <MetricCard label="Дропнуто"       value={stats.dropped} muted />
-        <MetricCard label="Средняя оценка" value={stats.avg_rate ?? 0} float accent />
-        <MetricCard label="Эпизодов"       value={stats.total_episodes ?? 0} />
-        <MetricCard label="Часов просмотра" value={hoursWatched} suffix="ч" />
-      </div>
-
+    <div className="insights">
+      {heading}
+      <dl className="insights-summary">
+        <div><dt>Тайтлов в коллекции</dt><dd>{stats.total_anime}</dd></div>
+        <div><dt>Тайтлов с оценкой</dt><dd>{ratedCount}</dd></div>
+        <div><dt>Средняя оценка</dt><dd>{stats.avg_rate?.toLocaleString('ru-RU', { maximumFractionDigits: 1 }) ?? '—'}
+          {stats.avg_rate != null && <small> / 10</small>}</dd></div>
+      </dl>
       <div className="stats-grid">
-
-        {/* Распределение по статусам */}
-        {stats.total_anime > 0 && (
-          <div className="card stats-card">
-            <p className="db-section-title">Распределение по статусам</p>
-            <div className="progress-bar">
-              {[
-                { key: 'watched',  width: stats.watched,  cls: 'seg-watched' },
-                { key: 'watching', width: stats.watching, cls: 'seg-watching' },
-                { key: 'want',     width: stats.want,     cls: 'seg-want' },
-                { key: 'dropped',  width: stats.dropped,  cls: 'seg-dropped' },
-              ].map(({ key, width, cls }) => (
-                <div
-                  key={key}
-                  className={`progress-seg ${cls}`}
-                  style={{ width: `${(width / stats.total_anime) * 100}%` }}
-                />
-              ))}
-            </div>
-            <div className="progress-legend">
-              <LegendItem color="var(--accent)"    label="Просмотрено" count={stats.watched} />
-              <LegendItem color="var(--surface-2)" label="Смотрю"      count={stats.watching} />
-              <LegendItem color="var(--surface)"   label="Планирую"    count={stats.want} />
-              <LegendItem color="#7a3040"          label="Дропнуто"    count={stats.dropped} />
-            </div>
-          </div>
-        )}
-
+        <section className="card stats-card">
+          <h2>Статусы коллекции</h2>
+          <div className="status-breakdown">{statuses.map(([key, count]) =>
+            <Link key={key} to={`/?status=${key}`}>
+              <span>{STATUS_LABEL[key]}</span>
+              <span className="status-track" aria-hidden="true"><i style={{ width: `${count / stats.total_anime * 100}%` }} /></span>
+              <b>{count}</b>
+            </Link>)}</div>
+        </section>
         {/* Активность по месяцам */}
         <div className="card stats-card">
-          <p className="db-section-title">Добавлено за 6 месяцев</p>
+          <h2>Добавлено за 6 месяцев</h2>
           <div className="bar-chart bar-chart--months">
             {months.map(m => {
               const count = monthCounts.get(m.key) ?? 0;
               return (
                 <div className="bar-col" key={m.key}>
-                  <span className="bar-col__count">{count > 0 ? count : ''}</span>
+                  <span className="bar-col__count">{count}</span>
                   <div className="bar-col__track">
                     <div
                       className="bar-col__fill"
-                      style={{ height: `${count > 0 ? Math.max((count / maxMonth) * 100, 6) : 0}%` }}
+                      style={{ height: `${count > 0 ? (count / maxMonth) * 100 : 0}%` }}
                     />
                   </div>
                   <span className="bar-col__label">{m.label}</span>
@@ -226,16 +140,16 @@ export default function StatsPage() {
 
         {/* Оценки */}
         <div className="card stats-card">
-          <p className="db-section-title">Распределение оценок</p>
+          <h2>Распределение оценок</h2>
           {ratedCount > 0 ? (
             <div className="bar-chart bar-chart--rates">
               {rateBuckets.map((count, i) => (
                 <div className="bar-col" key={i}>
-                  <span className="bar-col__count">{count > 0 ? count : ''}</span>
+                  <span className="bar-col__count">{count}</span>
                   <div className="bar-col__track">
                     <div
                       className="bar-col__fill bar-col__fill--accent"
-                      style={{ height: `${count > 0 ? Math.max((count / maxRate) * 100, 6) : 0}%` }}
+                      style={{ height: `${count > 0 ? (count / maxRate) * 100 : 0}%` }}
                     />
                   </div>
                   <span className="bar-col__label">{i + 1}</span>
@@ -249,7 +163,7 @@ export default function StatsPage() {
 
         {/* Жанры */}
         <div className="card stats-card">
-          <p className="db-section-title">Любимые жанры</p>
+          <h2>Частые жанры</h2>
           {topGenres.length > 0 ? (
             <div className="genre-bars">
               {topGenres.map(([title, count]) => (
@@ -274,7 +188,7 @@ export default function StatsPage() {
 
         {/* Топ по оценке */}
         <div className="card stats-card stats-card--wide">
-          <p className="db-section-title">Топ по твоей оценке</p>
+          <h2>Тайтлы с высшими оценками</h2>
           {topRated.length > 0 ? (
             <div className="top-rated-list">
               {topRated.map((item, idx) => (
@@ -282,7 +196,7 @@ export default function StatsPage() {
                   <span className="top-rated-row__rank">{idx + 1}</span>
                   <div className="top-rated-row__poster">
                     {item.anime.poster
-                      ? <img src={item.anime.poster} alt={item.anime.title} />
+                      ? <img src={item.anime.poster} alt="" />
                       : <div className="top-rated-row__no-poster">—</div>
                     }
                   </div>
