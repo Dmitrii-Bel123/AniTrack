@@ -207,3 +207,7 @@ docker run --rm -it \
   node:22 \
   npm run build && docker-compose restart nginx
 ```
+
+Запустить фронт локально, для динамического обновления. 
+cd frontend
+npm run dev
