@@ -10,16 +10,16 @@ def test_user_save_correctly_and_check_password():
         data={
             "username": "test_user",
             "email": "test@test.com",
-            "password": "Password123_"
+            "password": "DSvgmok233_"
         }
     )
 
     assert serializer.is_valid(), serializer.errors
     serializer.save()
     user = User.objects.get(username="test_user")
-    assert user.check_password("Password123_")
+    assert user.check_password("DSvgmok233_")
     assert user.email == "test@test.com"
-    assert not user.password == "Password123_" # пароль хэшируется
+    assert not user.password == "DSvgmok233_" # пароль хэшируется
     assert "password" not in serializer.data # Пароль не попадает в выходные данные сериализатора.
 
 
@@ -30,7 +30,7 @@ def test_username_exists():
         data={
             "username": "test_user",
             "email": "test@test.com",
-            "password": "Password123_"
+            "password": "DSvgmok233_"
         }
     )
     assert serializer.is_valid(), serializer.errors
@@ -41,7 +41,7 @@ def test_username_exists():
         data={
             "username": "test_user",
             "email": "test@test.com",
-            "password": "Password123_"
+            "password": "DSvgmok233_"
         }
     )
     assert not wrong_serializer.is_valid(), wrong_serializer.errors
@@ -49,7 +49,7 @@ def test_username_exists():
 
 # Сценарий 3. Пароль не подходит
 @pytest.mark.django_db
-@pytest.mark.parametrize("password,expected", [("123", False), ("1234567", False), ("12345678", True)])
+@pytest.mark.parametrize("password,expected", [("123", False), ("1234567", False), ("WeXzX43_", True)])
 def test_registration_password_length(password, expected):
 
     serializer = RegistrationSerializer(
@@ -69,7 +69,7 @@ def test_without_required_field():
     serializer = RegistrationSerializer(
         data={
             "email": "testuser@test.com",
-            "password": "Password123_"
+            "password": "DSvgmok233_"
         }
     )
 
