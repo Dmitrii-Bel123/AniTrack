@@ -156,7 +156,8 @@ class AddAnimeToListView(APIView):
             anime = get_or_create_anime(mal_id)
         except Exception as e:
             return Response(
-                {"detail": f"Ошибка при получении аниме: {str(e)}"}
+                {"detail": f"Ошибка при получении аниме"},
+                status=status.HTTP_502_BAD_GATEWAY
             )
 
         # Проверяем: вдруг пользователь уже добавил это аниме
@@ -167,7 +168,7 @@ class AddAnimeToListView(APIView):
         )
 
         if not created:
-            return Response({'detail': 'Аниме уже есть в вашем списке'}, status=status.HTTP_200_OK)
+            return Response({'detail': 'Аниме уже есть в вашем списке'}, status=status.HTTP_409_CONFLICT)
         return Response(
             UserAnimeDetailSerializer(user_anime).data,
             status=status.HTTP_201_CREATED
