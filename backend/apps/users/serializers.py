@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from .models import User
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(max_length=128, min_length=8, write_only=True)
+    password = serializers.CharField(max_length=128, min_length=8, write_only=True, validators=[validate_password])
     class Meta:
         model = User
         fields = ['email', 'username', 'password']
@@ -23,5 +23,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True)
+    old_password = serializers.CharField(required=True, write_only=True)
     new_password = serializers.CharField(required=True, write_only=True, validators=[validate_password])
+
+    def validate(self, attrs):
+        if attrs['old_password'] == attrs['new_password']:
+            raise serializers.ValidationError(
+                {'new_password': 'Новый пароль должен отличаться от старого'}
+            )
+        return attrs
