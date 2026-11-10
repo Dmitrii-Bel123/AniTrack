@@ -7,7 +7,7 @@ import Search from './Search';
 
 const filters = [
   ['PR', 'Смотрю'], ['all', 'Все'], ['WW', 'Планирую'],
-  ['WD', 'Просмотрено'], ['DR', 'Дропнуто'],
+  ['WD', 'Просмотрено'], ['DR', 'Брошено'],
 ] as const;
 
 export default function MyList() {

@@ -138,7 +138,7 @@ export default function Dashboard() {
           <MetricCard label="Просмотрено"    value={stats.watched} />
           <MetricCard label="Смотрю"         value={stats.watching} accent />
           <MetricCard label="Планирую"       value={stats.want} />
-          <MetricCard label="Дропнуто"       value={stats.dropped} muted />
+          <MetricCard label="Брошено"       value={stats.dropped} muted />
           <MetricCard label="Средняя оценка" value={stats.avg_rate ?? 0} float accent />
           <MetricCard label="Эпизодов"       value={stats.total_episodes ?? 0} />
         </div>
@@ -166,7 +166,7 @@ export default function Dashboard() {
             <LegendItem color="var(--accent)"    label="Просмотрено" count={stats.watched} />
             <LegendItem color="var(--surface-2)" label="Смотрю"      count={stats.watching} />
             <LegendItem color="var(--surface)"   label="Планирую"    count={stats.want} />
-            <LegendItem color="#7a3040"           label="Дропнуто"    count={stats.dropped} />
+            <LegendItem color="#7a3040"           label="Брошено"    count={stats.dropped} />
           </div>
         </div>
       )}

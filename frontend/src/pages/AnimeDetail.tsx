@@ -34,7 +34,7 @@ interface DetailData {
   updated_at: string;
 }
 
-const STATUS_OPTIONS = { PR: 'Смотрю', WW: 'Планирую', WD: 'Просмотрено', DR: 'Дропнуто' };
+const STATUS_OPTIONS = { PR: 'Смотрю', WW: 'Планирую', WD: 'Просмотрено', DR: 'Брошено' };
 
 function recordFields(data: DetailData) {
   return {

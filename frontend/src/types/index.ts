@@ -46,7 +46,7 @@ export const STATUS_LABEL: Record<string, string> = {
   WW: 'Планирую',
   PR: 'Смотрю',
   WD: 'Просмотрено',
-  DR: 'Дропнуто',
+  DR: 'Брошено',
 };
 
 export const STATUS_BADGE: Record<string, string> = {
