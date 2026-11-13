@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { IconCamera } from '@tabler/icons-react';
+import { IconCamera, IconDownload } from '@tabler/icons-react';
 import api from '../api/axios';
 import type { User } from '../types/index';
 
 export default function Profile() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [attempt, setAttempt] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const [user, setUser]   = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,6 +121,27 @@ export default function Profile() {
           }}>Повторить</button></>}
     </section></div>;
   }
+  async function handleExport() {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const response = await api.get('/anime/export_collection/', {
+        responseType: 'blob',
+      });
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = 'collection.json';
+      link.click();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      setExportError('Не удалось скачать коллекцию. Попробуй ещё раз.');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <div className="account">
@@ -127,11 +150,17 @@ export default function Profile() {
         <span className="account-avatar" aria-hidden="true">{user.avatar
           ? <img src={user.avatar} alt="" /> : user.username[0]?.toUpperCase()}</span>
         <div><h2>{user.username}</h2><p>{user.email}</p></div>
-        <button className="account-photo" onClick={handleAvatarPick} disabled={avatarUploading}>
-          <IconCamera size={18} aria-hidden="true" />{avatarUploading ? 'Загружаю…' : 'Сменить фото'}
-        </button>
+        <div className="account-actions">
+          <button type="button" className="account-export" onClick={handleExport} disabled={exporting} aria-busy={exporting}>
+            <IconDownload size={18} aria-hidden="true" />{exporting ? 'Скачиваю…' : 'Экспорт JSON'}
+          </button>
+          <button type="button" className="account-photo" onClick={handleAvatarPick} disabled={avatarUploading}>
+            <IconCamera size={18} aria-hidden="true" />{avatarUploading ? 'Загружаю…' : 'Сменить фото'}
+          </button>
+        </div>
         <input ref={fileInput} type="file" accept="image/*" hidden onChange={handleAvatarChange} />
         {avatarMessage && <p className="account-avatar-message" role="status">{avatarMessage}</p>}
+        {exportError && <p className="account-avatar-message" role="alert">{exportError}</p>}
       </section>
       <div className="account-forms">
           <form className="account-panel" onSubmit={handleInfoSubmit}>

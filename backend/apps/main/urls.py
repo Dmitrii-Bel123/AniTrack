@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import UserAnimeListView, UserAnimeDetailView, AnimeSearchView, AddAnimeToListView, StatisticsView
+from .views import UserAnimeListView, UserAnimeDetailView, AnimeSearchView, AddAnimeToListView, StatisticsView, \
+    ExportCollectionView
 
 urlpatterns = [
     # User routs
@@ -12,4 +13,7 @@ urlpatterns = [
 
     #Statistics
     path('my/stat/', StatisticsView.as_view()),
+
+    # Export collection
+    path('export_collection/', ExportCollectionView.as_view())
     ]

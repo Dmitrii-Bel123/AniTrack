@@ -194,3 +194,16 @@ class StatisticsView(APIView):
 
         serializer = StatisticSerializer(instance=stats)
         return Response(serializer.data)
+
+
+class ExportCollectionView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        queryset = (UserAnime.objects.filter(user=self.request.user)
+                    .select_related('anime')
+                    .prefetch_related('anime__genres'))
+        serializer = UserAnimeDetailSerializer(instance=queryset, many=True)
+
+        return Response(serializer.data, headers={
+            "Content-Type": "application/json",
+            "Content-Disposition": 'attachment; filename="collection.json"',})
