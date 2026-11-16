@@ -12,27 +12,13 @@ export interface Anime {
   genres: Genre[];
 }
 
+/** GET /anime/my/ — UserAnimeListSerializer, not the detail/export response. */
 export interface UserAnime {
   id: number;
   anime: Anime;
   user_rate: string | null;
   user_status: 'WW' | 'PR' | 'WD' | 'DR';
-  user_note: string | null;
-  user_fav_character: string | null;
-  started_at: string | null;
-  finished_at: string | null;
   created_at: string;
-  updated_at: string;
-}
-
-export interface Stats {
-  total_anime: number;
-  want: number;
-  watching: number;
-  watched: number;
-  dropped: number;
-  avg_rate: number | null;
-  total_episodes: number | null;
 }
 
 export interface User {

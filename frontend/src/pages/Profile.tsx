@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { IconCamera, IconDownload } from '@tabler/icons-react';
 import api from '../api/axios';
+import PageHeading from '../components/ui/PageHeading';
 import type { User } from '../types/index';
 
 export default function Profile() {
@@ -110,7 +111,7 @@ export default function Profile() {
     }
   };
 
-  const heading = <header className="account-heading"><p>Мой аккаунт</p><h1>Профиль</h1></header>;
+  const heading = <PageHeading index="03" label="Твоё пространство" title="Профиль" />;
   if (loading || !user) {
     return <div className="account">{heading}<section className="account-panel">
       {loading ? <p role="status">Загружаю профиль…</p> :

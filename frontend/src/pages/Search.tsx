@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { IconSearch, IconPlus, IconCheck } from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconCheck, IconX, IconPlanet } from '@tabler/icons-react';
 import api from '../api/axios';
+import PageHeading from '../components/ui/PageHeading';
+import Poster from '../components/ui/Poster';
 import type { AxiosResponse } from 'axios';
 
 interface SearchResult {
@@ -85,8 +87,7 @@ export default function Search({ onAdded }: { onAdded?: () => void }) {
 
       {/* Заголовок */}
       <div className="search-hero">
-        <p className="kicker">Моя коллекция</p>
-        <div className="page-heading"><h1>Добавить аниме</h1></div>
+        <PageHeading index="+" label="Новая история" title="Добавить аниме" />
         <p className="db-sub">Ищи по базе MyAnimeList и добавляй в свой список</p>
       </div>
 
@@ -108,7 +109,7 @@ export default function Search({ onAdded }: { onAdded?: () => void }) {
               className="search-bar__clear" aria-label="Очистить поиск"
               onClick={() => { setQuery(''); setResults([]); setSearched(false); inputRef.current?.focus(); }}
             >
-              ✕
+              <IconX size={16} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -125,7 +126,7 @@ export default function Search({ onAdded }: { onAdded?: () => void }) {
       </form>
 
       {/* Ошибка */}
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="alert alert-error" role="alert">{error}</div>}
 
       {/* Скелетон загрузки */}
       {loading && (
@@ -153,10 +154,7 @@ export default function Search({ onAdded }: { onAdded?: () => void }) {
               return (
                 <div key={item.mal_id} className="search-card">
                   <div className="search-card__poster">
-                    {item.poster
-                      ? <img src={item.poster} alt={item.title} />
-                      : <div className="search-card__no-img">Без обложки</div>
-                    }
+                    <Poster src={item.poster} />
                   </div>
                   <div className="search-card__body">
                     <p className="search-card__title">{item.title}</p>
@@ -200,7 +198,7 @@ export default function Search({ onAdded }: { onAdded?: () => void }) {
       {/* Пустое начальное состояние */}
       {!loading && !searched && (
         <div className="search-empty">
-          <p className="search-empty__icon">◎</p>
+          <IconPlanet size={42} stroke={1} aria-hidden="true" />
           <p className="search-empty__text">Введи название аниме и нажми «Найти»</p>
         </div>
       )}

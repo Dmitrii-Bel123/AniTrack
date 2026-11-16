@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { IconArrowLeft, IconEdit } from '@tabler/icons-react';
 import api from '../api/axios';
+import Poster from '../components/ui/Poster';
 import type { AxiosResponse } from 'axios';
 
 
@@ -131,7 +132,7 @@ export default function AnimeDetail() {
       <div className="sheet-grid">
         <div className="sheet-rail">
         <div className="sheet-art">
-          {data.poster ? <img src={data.poster} alt={`Постер «${data.title}»`} /> : <span>Без обложки</span>}
+          <Poster src={data.poster} alt={`Постер «${data.title}»`} eager />
         </div>
         <aside className="sheet-facts">
           <h2>О тайтле</h2>
